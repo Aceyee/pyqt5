@@ -3,6 +3,20 @@ import qtpy.QtGui as QtGui
 import qtpy.QtWidgets as QtWidgets
 import qtpy.QtCore as QtCore
 
+class DoubleModel(QtCore.QAbstractListModel):
+    def __init__(self, student_list=list()):
+        super(DoubleModel, self).__init__()
+        self.student_list = student_list
+    
+    def rowCount(self, parent):
+        return len(self.student_list)
+
+    def data(self, index, role):
+        row = index.row()
+        if role == QtCore.Qt.DisplayRole:
+            value = self.student_list[row]
+            first_key = next(iter(value)) 
+            return str(first_key)
 
 class DoubleView(QtWidgets.QWidget):
     def __init__(self):
@@ -55,8 +69,13 @@ class DoubleView(QtWidgets.QWidget):
         self.right_view.clicked.connect(self.index_changed)
 
 if __name__ == '__main__':
-    data = []
+    student_list = [
+        {'student1': {'height':'170cm', 'weight':'60kg'}},
+        {'student2': {'height':'160cm', 'weight':'55kg'}}
+    ]
     app = QtWidgets.QApplication(sys.argv)
+    model = DoubleModel(student_list)
     view = DoubleView()
+    view.setModel(model)
     view.show()
     sys.exit(app.exec_())
