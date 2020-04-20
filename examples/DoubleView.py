@@ -47,15 +47,6 @@ class DoubleView(QtWidgets.QWidget):
         self.left_view.setModel(model)  # apply the model to the list view
         self.index_changed(model.index(0, 0))  # select the first item as default
 
-    def index_changed(self, index):
-        """
-        This function updates the current index in list view and updates the right group based on the selected index
-        :param: (QModelIndex) index - the index that need to be set
-        """
-        pass
-        # self.left_view.setCurrentIndex(index)
-        # self.update_right_group_box()
-
     def setup_left_view(self):
         """
         This function initialize left view's event
@@ -67,6 +58,20 @@ class DoubleView(QtWidgets.QWidget):
         This function initialize right view's event
         """
         self.right_view.clicked.connect(self.index_changed)
+
+    def index_changed(self, index):
+        """
+        This function updates the current index in list view and updates the right group based on the selected index
+        :param: (QModelIndex) index - the index that need to be set
+        """
+        self.left_view.setCurrentIndex(index)
+        self.update_right_view()
+
+    def update_right_view(self):
+        """
+        This function updates the right group box according the list view's current selected item
+        """
+        pass
 
 if __name__ == '__main__':
     student_list = [
