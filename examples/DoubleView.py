@@ -13,10 +13,12 @@ class DoubleModel(QtCore.QAbstractListModel):
 
     def data(self, index, role):
         row = index.row()
+        value = self.student_list[row]
+        first_key = next(iter(value)) 
         if role == QtCore.Qt.DisplayRole:
-            value = self.student_list[row]
-            first_key = next(iter(value)) 
             return str(first_key)
+        if role == QtCore.Qt.UserRole:
+            return value[first_key]
 
 class DoubleView(QtWidgets.QWidget):
     def __init__(self):
@@ -71,7 +73,13 @@ class DoubleView(QtWidgets.QWidget):
         """
         This function updates the right group box according the list view's current selected item
         """
-        pass
+        index = self.left_view.currentIndex()
+        model = index.model()
+        info_dict = model.data(index, QtCore.Qt.UserRole)
+        for key in info_dict:
+            key_label = QtWidgets.QLabel(key)
+            val_label = QtWidgets.QLabel(info_dict[key])
+            key_label.setBuddy(val_label)
 
 if __name__ == '__main__':
     student_list = [
