@@ -22,8 +22,11 @@ class DictModel(QtCore.QAbstractItemModel):
     def data(self, index, role):
         row = index.row()
         keys = student_dict.keys()
+        key = keys[row]
         if role == QtCore.Qt.DisplayRole:
-            value = keys[row]
+            return key
+        if role == QtCore.Qt.UserRole:
+            value = student_dict[key]
             return value
         # print 'data', len(self.student_dict)
 
@@ -86,6 +89,7 @@ class DictView(QtWidgets.QWidget):
         index = self.left_view.currentIndex()
         model = index.model()
         info_dict = model.data(index, QtCore.Qt.UserRole)
+        print info_dict
 
 if __name__ == '__main__':
     student_dict = collections.OrderedDict()
