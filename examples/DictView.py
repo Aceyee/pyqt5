@@ -1,24 +1,34 @@
 import sys
+import collections
 import qtpy.QtGui as QtGui
 import qtpy.QtWidgets as QtWidgets
 import qtpy.QtCore as QtCore
 
-class DictModel(QtCore.QAbstractListModel):
-    def __init__(self, student_list=list()):
+class DictModel(QtCore.QAbstractItemModel):
+    def __init__(self, student_dict=dict()):
         super(DictModel, self).__init__()
-        self.student_list = student_list
+        self.student_dict = student_dict
     
     def rowCount(self, parent):
-        return len(self.student_list)
+        return len(self.student_dict)
+
+    def columnCount(self, parent):
+        return 1
+
+    def index(self, row, column, parent):
+        index = self.createIndex(row, column)
+        return index
 
     def data(self, index, role):
         row = index.row()
-        value = self.student_list[row]
-        first_key = next(iter(value)) 
+        keys = student_dict.keys()
         if role == QtCore.Qt.DisplayRole:
-            return str(first_key)
-        if role == QtCore.Qt.UserRole:
-            return value[first_key]
+            value = keys[row]
+            return value
+        # print 'data', len(self.student_dict)
+
+    def parent(self, index):
+        return QtCore.QModelIndex()
 
 class DictView(QtWidgets.QWidget):
     def __init__(self):
@@ -47,7 +57,7 @@ class DictView(QtWidgets.QWidget):
         :param: (ConfigModel) model - the model that contains all data, logic, and algorithm
         """
         self.left_view.setModel(model)  # apply the model to the list view
-        self.index_changed(model.index(0, 0))  # select the first item as default
+        # self.index_changed(model.index(0, 0))  # select the first item as default
 
     def setup_left_view(self):
         """
@@ -76,18 +86,20 @@ class DictView(QtWidgets.QWidget):
         index = self.left_view.currentIndex()
         model = index.model()
         info_dict = model.data(index, QtCore.Qt.UserRole)
-        for key in info_dict:
-            key_label = QtWidgets.QLabel(key)
-            val_label = QtWidgets.QLabel(info_dict[key])
-            key_label.setBuddy(val_label)
 
 if __name__ == '__main__':
-    student_list = [
-        {'student1': {'height':'170cm', 'weight':'60kg'}},
-        {'student2': {'height':'160cm', 'weight':'55kg'}}
-    ]
+    student_dict = collections.OrderedDict()
+    student_dict['student1'] = {
+            'height':'170cm',
+            'weight':'60kg'
+            }
+    student_dict['student2'] = {
+            'height':'160cm',
+            'weight':'55kg'
+            }
+
     app = QtWidgets.QApplication(sys.argv)
-    model = DictModel(student_list)
+    model = DictModel(student_dict)
     view = DictView()
     view.setModel(model)
     view.show()
