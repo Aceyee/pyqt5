@@ -3,9 +3,9 @@ import qtpy.QtGui as QtGui
 import qtpy.QtWidgets as QtWidgets
 import qtpy.QtCore as QtCore
 
-class DoubleModel(QtCore.QAbstractListModel):
+class DictModel(QtCore.QAbstractListModel):
     def __init__(self, student_list=list()):
-        super(DoubleModel, self).__init__()
+        super(DictModel, self).__init__()
         self.student_list = student_list
     
     def rowCount(self, parent):
@@ -20,9 +20,9 @@ class DoubleModel(QtCore.QAbstractListModel):
         if role == QtCore.Qt.UserRole:
             return value[first_key]
 
-class DoubleView(QtWidgets.QWidget):
+class DictView(QtWidgets.QWidget):
     def __init__(self):
-        super(DoubleView, self).__init__()
+        super(DictView, self).__init__()
         self.left_view = QtWidgets.QListView()
         self.right_view = QtWidgets.QListView()
         self.main_layout = QtWidgets.QGridLayout()
@@ -87,8 +87,8 @@ if __name__ == '__main__':
         {'student2': {'height':'160cm', 'weight':'55kg'}}
     ]
     app = QtWidgets.QApplication(sys.argv)
-    model = DoubleModel(student_list)
-    view = DoubleView()
+    model = DictModel(student_list)
+    view = DictView()
     view.setModel(model)
     view.show()
     sys.exit(app.exec_())
