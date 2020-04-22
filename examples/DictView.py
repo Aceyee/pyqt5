@@ -4,40 +4,43 @@ import qtpy.QtGui as QtGui
 import qtpy.QtWidgets as QtWidgets
 import qtpy.QtCore as QtCore
 
-class DictModel(QtCore.QAbstractItemModel):
+class DictModel(QtGui.QStandardItemModel):
     def __init__(self, student_dict=dict()):
         super(DictModel, self).__init__()
         self.student_dict = student_dict
-    
-    def rowCount(self, parent):
-        return len(self.student_dict)
+        self.setup_model()
 
-    def columnCount(self, parent):
-        return 1
-
-    def index(self, row, column, parent):
-        index = self.createIndex(row, column)
-        return index
-
+    def setup_model(self):
+        for key in self.student_dict:
+            key_item = QtGui.QStandardItem(key)
+            self.appendRow(key_item)
+            for attr in self.student_dict[key]:
+                value = self.student_dict[key][attr]
+                attr_item = QtGui.QStandardItem(attr)
+                value_item = QtGui.QStandardItem(value)
+                key_item.appendRow([attr_item, value_item])
+            
     def data(self, index, role):
-        row = index.row()
-        keys = student_dict.keys()
-        key = keys[row]
         if role == QtCore.Qt.DisplayRole:
-            return key
+            return QtGui.QStandardItemModel.data(self, index, role)
         if role == QtCore.Qt.UserRole:
-            value = student_dict[key]
-            return value
-        # print 'data', len(self.student_dict)
-
-    def parent(self, index):
-        return QtCore.QModelIndex()
+            model = QtGui.QStandardItemModel()
+            model.setColumnCount(2)
+            key = index.data()
+            key_item = QtGui.QStandardItem(key)
+            model.appendRow(key_item)
+            for attr in self.student_dict[key]:
+                value = self.student_dict[key][attr]
+                attr_item = QtGui.QStandardItem(attr)
+                value_item = QtGui.QStandardItem(value)
+                key_item.appendRow([attr_item, value_item])
+            return model
 
 class DictView(QtWidgets.QWidget):
     def __init__(self):
         super(DictView, self).__init__()
         self.left_view = QtWidgets.QListView()
-        self.right_view = QtWidgets.QListView()
+        self.right_view = QtWidgets.QTreeView()
         self.main_layout = QtWidgets.QGridLayout()
         self.setup()
 
@@ -47,7 +50,7 @@ class DictView(QtWidgets.QWidget):
         """
         # set up left and right view
         self.setup_left_view()
-        self.setup_right_view()
+        # self.setup_right_view()
 
         # add all above to main layout
         self.main_layout.addWidget(self.left_view, 0, 0)
@@ -88,8 +91,8 @@ class DictView(QtWidgets.QWidget):
         """
         index = self.left_view.currentIndex()
         model = index.model()
-        info_dict = model.data(index, QtCore.Qt.UserRole)
-        print info_dict
+        model2 = index.data(QtCore.Qt.UserRole)
+        self.right_view.setModel(model2)
 
 if __name__ == '__main__':
     student_dict = collections.OrderedDict()
@@ -101,7 +104,6 @@ if __name__ == '__main__':
             'height':'160cm',
             'weight':'55kg'
             }
-
     app = QtWidgets.QApplication(sys.argv)
     model = DictModel(student_dict)
     view = DictView()
