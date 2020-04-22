@@ -48,11 +48,10 @@ class DictView(QtWidgets.QWidget):
         """
         This function initialize double view's layout
         """
-        # set up left and right view
+        # set up left view
         self.setup_left_view()
-        # self.setup_right_view()
 
-        # add all above to main layout
+        # add two views to main layout
         self.main_layout.addWidget(self.left_view, 0, 0)
         self.main_layout.addWidget(self.right_view, 0, 1)
         self.setLayout(self.main_layout)
@@ -71,12 +70,6 @@ class DictView(QtWidgets.QWidget):
         """
         self.left_view.clicked.connect(self.index_changed)
 
-    def setup_right_view(self):
-        """
-        This function initialize right view's event
-        """
-        self.right_view.clicked.connect(self.index_changed)
-
     def index_changed(self, index):
         """
         This function updates the current index in list view and updates the right group based on the selected index
@@ -90,9 +83,8 @@ class DictView(QtWidgets.QWidget):
         This function updates the right group box according the list view's current selected item
         """
         index = self.left_view.currentIndex()
-        model = index.model()
-        model2 = index.data(QtCore.Qt.UserRole)
-        self.right_view.setModel(model2)
+        model = index.data(QtCore.Qt.UserRole)
+        self.right_view.setModel(model)
 
 if __name__ == '__main__':
     student_dict = collections.OrderedDict()
