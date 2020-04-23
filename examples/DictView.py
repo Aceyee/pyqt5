@@ -60,7 +60,7 @@ class DictView(QtWidgets.QWidget):
         :param: (ConfigModel) model - the model that contains all data, logic, and algorithm
         """
         self.left_view.setModel(model)  # apply the model to the list view
-        # self.index_changed(model.index(0, 0))  # select the first item as default
+        self.index_changed(model.index(0, 0))  # select the first item as default
 
     def setup_left_view(self):
         """
@@ -93,11 +93,11 @@ class DictView(QtWidgets.QWidget):
 
 if __name__ == '__main__':
     student_dict = collections.OrderedDict()
-    student_dict['student1'] = {
+    student_dict['Jason Major'] = {
             'height':'170cm',
             'weight':'60kg'
             }
-    student_dict['student2'] = {
+    student_dict['Alex Boyd'] = {
             'height':'160cm',
             'weight':'55kg'
             }
