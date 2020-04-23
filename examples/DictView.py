@@ -45,8 +45,9 @@ class DictView(QtWidgets.QWidget):
         """
         This function initialize double view's layout
         """
-        # set up left view
+        # set up left and right view
         self.setup_left_view()
+        self.setup_right_view()
 
         # add two views to main layout
         self.main_layout.addWidget(self.left_view, 0, 0)
@@ -66,6 +67,12 @@ class DictView(QtWidgets.QWidget):
         This function initialize left view's event
         """
         self.left_view.clicked.connect(self.index_changed)
+
+    def setup_right_view(self):
+        """
+        This function initialize left view's event
+        """
+        self.right_view.setHeaderHidden(True)
 
     def index_changed(self, index):
         """
