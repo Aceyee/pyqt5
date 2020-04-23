@@ -14,28 +14,26 @@ class DictModel(QtGui.QStandardItemModel):
     def setup_model(self):
         for key in self.student_dict:
             key_item = QtGui.QStandardItem(key)
-            model = QtGui.QStandardItemModel()
             self.appendRow(key_item)
-            self.dict[key] = model
             for attr in self.student_dict[key]:
                 value = self.student_dict[key][attr]
                 attr_item = QtGui.QStandardItem(attr)
                 value_item = QtGui.QStandardItem(value)
-                model.appendRow([attr_item, value_item])
-            item = QtGui.QStandardItem()
-            item.setData(model, QtCore.Qt.UserRole)
-            key_item.appendRow(item)
-            print 'aaa', key_item, item, item.data(QtCore.Qt.UserRole)
+                key_item.appendRow([attr_item, value_item])
             
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole:
             return QtGui.QStandardItemModel.data(self, index, role)
         if role == QtCore.Qt.UserRole:
-            print '---------------'
             key_item = self.itemFromIndex(index)
-            item = key_item.child(0, 0)
-            print key_item, item, item.data(role)
-            return item.data(role)
+            key = index.data()
+            temp_model = QtGui.QStandardItemModel()
+            for attr in self.student_dict[key]:
+                value = self.student_dict[key][attr]
+                attr_item = QtGui.QStandardItem(attr)
+                value_item = QtGui.QStandardItem(value)
+                temp_model.appendRow([attr_item, value_item])
+            return temp_model
 
 class DictView(QtWidgets.QWidget):
     def __init__(self):
