@@ -25,17 +25,13 @@ class DictModel(QtGui.QStandardItemModel):
             item = QtGui.QStandardItem()
             item.setData(model, QtCore.Qt.UserRole)
             key_item.appendRow(item)
-            print 'aaa', key_item, item, item.data(QtCore.Qt.UserRole)
             
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole:
             return QtGui.QStandardItemModel.data(self, index, role)
         if role == QtCore.Qt.UserRole:
-            print '---------------'
-            key_item = self.itemFromIndex(index)
-            item = key_item.child(0, 0)
-            print key_item, item, item.data(role)
-            return item.data(role)
+            key = index.data()
+            return self.dict[key]
 
 class DictView(QtWidgets.QWidget):
     def __init__(self):
