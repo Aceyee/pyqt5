@@ -73,6 +73,7 @@ class DictView(QtWidgets.QWidget):
         This function initialize left view's event
         """
         self.right_view.setHeaderHidden(True)
+        self.right_view.setIndentation(10)
 
     def index_changed(self, index):
         """
