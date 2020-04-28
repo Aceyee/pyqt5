@@ -1,35 +1,31 @@
-import qtpy.QtGui as QtGui
-import qtpy.QtWidgets as QtWidgets
-import qtpy.QtCore as QtCore
-
 import operator
-from qtpy.QtCore import *
-from qtpy.QtWidgets import *
-from qtpy.QtGui import *
+import qtpy.QtCore as QtCore
+import qtpy.QtWidgets as QtWidgets
+import qtpy.QtGui as QtGui
 
-class MyWindow(QWidget):
+class MyWindow(QtWidgets.QWidget):
     def __init__(self, data_list, header, *args):
-        QWidget.__init__(self, *args)
+        super(MyWindow, self).__init__()
         # setGeometry(x_pos, y_pos, width, height)
         self.setGeometry(300, 200, 570, 450)
         self.setWindowTitle("Click on column title to sort")
         table_model = MyTableModel(self, data_list, header)
-        table_view = QTableView()
+        table_view = QtWidgets.QTableView()
         table_view.setModel(table_model)
         # set font
-        font = QFont("Courier New", 14)
+        font = QtGui.QFont("Courier New", 14)
         table_view.setFont(font)
         # set column width to fit contents (set font first!)
         table_view.resizeColumnsToContents()
         # enable sorting
         table_view.setSortingEnabled(True)
-        layout = QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(table_view)
         self.setLayout(layout)
         
-class MyTableModel(QAbstractTableModel):
+class MyTableModel(QtCore.QAbstractTableModel):
     def __init__(self, parent, mylist, header, *args):
-        QAbstractTableModel.__init__(self, parent, *args)
+        super(MyTableModel, self).__init__()
         self.mylist = mylist
         self.header = header
     def rowCount(self, parent):
@@ -39,11 +35,11 @@ class MyTableModel(QAbstractTableModel):
     def data(self, index, role):
         if not index.isValid():
             return None
-        elif role != Qt.DisplayRole:
+        elif role != QtCore.Qt.DisplayRole:
             return None
         return self.mylist[index.row()][index.column()]
     def headerData(self, col, orientation, role):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
             return self.header[col]
         return None
     def sort(self, col, order):
@@ -51,7 +47,7 @@ class MyTableModel(QAbstractTableModel):
         self.layoutAboutToBeChanged.emit()
         self.mylist = sorted(self.mylist,
             key=operator.itemgetter(col))
-        if order == Qt.DescendingOrder:
+        if order == QtCore.Qt.DescendingOrder:
             self.mylist.reverse()
         self.layoutChanged.emit()
 
@@ -117,7 +113,7 @@ data_list = [
 ('WATER', 100.0, 0.0, 1.0),
 ('XYLENES', 139.1, -47.8, 0.86)
 ]
-app = QApplication([])
+app = QtWidgets.QApplication([])
 win = MyWindow(data_list, header)
 win.show()
 app.exec_()
