@@ -28,20 +28,25 @@ class MyTableModel(QtCore.QAbstractTableModel):
         super(MyTableModel, self).__init__()
         self.mylist = mylist
         self.header = header
+
     def rowCount(self, parent):
         return len(self.mylist)
+
     def columnCount(self, parent):
         return len(self.mylist[0])
+
     def data(self, index, role):
         if not index.isValid():
             return None
         elif role != QtCore.Qt.DisplayRole:
             return None
         return self.mylist[index.row()][index.column()]
+
     def headerData(self, col, orientation, role):
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
             return self.header[col]
         return None
+        
     def sort(self, col, order):
         """sort table by given column number col"""
         self.layoutAboutToBeChanged.emit()
