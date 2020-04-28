@@ -10,8 +10,12 @@ class MyWindow(QtWidgets.QWidget):
         self.setGeometry(300, 200, 570, 450)
         self.setWindowTitle("Click on column title to sort")
         table_model = MyTableModel(self, data_list, header)
+        
+        self.proxy_model = QtCore.QSortFilterProxyModel()
+        self.proxy_model.setSourceModel(table_model)
+
         table_view = QtWidgets.QTableView()
-        table_view.setModel(table_model)
+        table_view.setModel(self.proxy_model)
         # set font
         font = QtGui.QFont("Courier New", 14)
         table_view.setFont(font)
@@ -19,9 +23,16 @@ class MyWindow(QtWidgets.QWidget):
         table_view.resizeColumnsToContents()
         # enable sorting
         table_view.setSortingEnabled(True)
+
+        line_edit = QtWidgets.QLineEdit()
+        line_edit.textChanged.connect(self.onTextChanged)
         layout = QtWidgets.QVBoxLayout(self)
+        layout.addWidget(line_edit)
         layout.addWidget(table_view)
         self.setLayout(layout)
+    
+    def onTextChanged(self, text):
+        self.proxy_model.setFilterRegExp(str(text))
         
 class MyTableModel(QtCore.QAbstractTableModel):
     def __init__(self, parent, mylist, header, *args):
@@ -46,7 +57,7 @@ class MyTableModel(QtCore.QAbstractTableModel):
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
             return self.header[col]
         return None
-        
+
     def sort(self, col, order):
         """sort table by given column number col"""
         self.layoutAboutToBeChanged.emit()
