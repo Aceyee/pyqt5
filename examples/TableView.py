@@ -68,14 +68,30 @@ class MyTableModel(QtCore.QAbstractTableModel):
         self.layoutChanged.emit()
 
 # the solvent data ...
-header = ['Input File Path', 'Role', 'Output TX', 'Role', 'Depth']
+# header = ['Input File Path', 'Role', 'Output TX', 'Role', 'Depth']
+header = ['source_path', 'source_space', 'dest_path', 'dest_space', 'depth', 'folder','orig_source']
+
 # use numbers for numeric data to sort properly
 data_list = [
 ('ACETIC ACID', 117.9, 16.7, 1.049, 5),
 ('ACETIC ANHYDRIDE', 140.1, -73.1, 1.087, 6),
 ('ACETONE', 56.3, -94.7, 0.791, 8)
 ]
+
+data = [
+(('AOV_spec_dot_nc8.tif'),'nc8', 'uint8',  'nc8',
+    ('AOV_spec_dot_nc8.tif'),  ('AOV_spec_dot_nc8.tx'),
+    ('Y:/APA/assets/gen_elems/Character_Elems/Eyes/textures')),
+
+(('dome_lnf.hdr'),'lnf', 'float',  'lnf',
+    ('dome_lnf.hdr'),  ('dome_lnf.tx'),
+    ('Y:/APA/assets/gen_elems/Character_Elems/Eyes/textures')),
+
+(('iris_NRM_nc8.tif'),'nc8', 'uint8',  'nc8',
+    ('iris_NRM_nc8.tif'),  ('iris_NRM_nc8.tx'),
+    ('Y:/APA/assets/gen_elems/Character_Elems/Eyes/textures')),
+]
 app = QtWidgets.QApplication([])
-win = MyWindow(data_list, header)
+win = MyWindow(data, header)
 win.show()
 app.exec_()
