@@ -7,7 +7,9 @@ class MyWindow(QtWidgets.QWidget):
     def __init__(self, data_list, header, *args):
         super(MyWindow, self).__init__()
         # setGeometry(x_pos, y_pos, width, height)
-        self.setGeometry(300, 200, 570, 450)
+        self.winwidth = 775
+        self.winheight = 500
+        self.setMinimumSize(self.winwidth, self.winheight)
         self.setWindowTitle("Click on column title to sort")
         table_model = MyTableModel(self, data_list, header)
         
@@ -38,24 +40,47 @@ class MyTableModel(QtCore.QAbstractTableModel):
     def __init__(self, parent, mylist, header, *args):
         super(MyTableModel, self).__init__()
         self.mylist = mylist
-        self.header = header
+        self.__columns = [{'name': 'source_path', 'visible': True},
+                    {'name': 'source_space', 'visible': True},
+                    {'name': 'dest_path', 'visible': True},
+                    {'name': 'dest_space', 'visible': True},
+                    {'name': 'depth', 'visible': True},
+                    {'name': 'orig_source', 'visible': False},
+                    {'name': 'folder', 'visible': False},
+                    ]
 
     def rowCount(self, parent):
         return len(self.mylist)
 
     def columnCount(self, parent):
-        return len(self.mylist[0])
+        num_visible = len([col for col in self.__columns if col['visible']])
+        return num_visible
 
     def data(self, index, role):
         if not index.isValid():
-            return None
-        elif role != QtCore.Qt.DisplayRole:
-            return None
-        return self.mylist[index.row()][index.column()]
+            return
+
+        if role == QtCore.Qt.DisplayRole:
+            return self.mylist[index.row()][self.__columns[index.column()]['name']]
+
+        elif role == 'full':
+            return self.mylist[index.row()]
+
+        elif isinstance(role, str):
+            return self.mylist[index.row()][role]
+
+        return None
 
     def headerData(self, col, orientation, role):
-        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
-            return self.header[col]
+        if orientation == QtCore.Qt.Horizontal:
+            if role == QtCore.Qt.DisplayRole:
+                result = " ".join([part.title() for part in self.__columns[col]['name'].split('_')]).replace(
+                    'Source', 'In').replace('Dest', 'Out')
+                return result
+
+        else:
+            return col
+
         return None
 
     def sort(self, col, order):
@@ -71,63 +96,23 @@ class MyTableModel(QtCore.QAbstractTableModel):
 header = ['Solvent Name', ' BP (deg C)', ' MP (deg C)', ' Density (g/ml)']
 # use numbers for numeric data to sort properly
 data_list = [
-('ACETIC ACID', 117.9, 16.7, 1.049),
-    ('ACETIC ANHYDRIDE', 140.1, -73.1, 1.087),
-    ('ACETONE', 56.3, -94.7, 0.791),
-    ('ACETONITRILE', 81.6, -43.8, 0.786),
-    ('ANISOLE', 154.2, -37.0, 0.995),
-    ('BENZYL ALCOHOL', 205.4, -15.3, 1.045),
-    ('BENZYL BENZOATE', 323.5, 19.4, 1.112),
-    ('BUTYL ALCOHOL NORMAL', 117.7, -88.6, 0.81),
-    ('BUTYL ALCOHOL SEC', 99.6, -114.7, 0.805),
-    ('BUTYL ALCOHOL TERTIARY', 82.2, 25.5, 0.786),
-    ('CHLOROBENZENE', 131.7, -45.6, 1.111),
-    ('CYCLOHEXANE', 80.7, 6.6, 0.779),
-    ('CYCLOHEXANOL', 161.1, 25.1, 0.971),
-    ('CYCLOHEXANONE', 155.2, -47.0, 0.947),
-    ('DICHLOROETHANE 1 2', 83.5, -35.7, 1.246),
-    ('DICHLOROMETHANE', 39.8, -95.1, 1.325),
-    ('DIETHYL ETHER', 34.5, -116.2, 0.715),
-    ('DIMETHYLACETAMIDE', 166.1, -20.0, 0.937),
-    ('DIMETHYLFORMAMIDE', 153.3, -60.4, 0.944),
-    ('DIMETHYLSULFOXIDE', 189.4, 18.5, 1.102),
-    ('DIOXANE 1 4', 101.3, 11.8, 1.034),
-    ('DIPHENYL ETHER', 258.3, 26.9, 1.066),
-    ('ETHYL ACETATE', 77.1, -83.9, 0.902),
-    ('ETHYL ALCOHOL', 78.3, -114.1, 0.789),
-    ('ETHYL DIGLYME', 188.2, -45.0, 0.906),
-    ('ETHYLENE CARBONATE', 248.3, 36.4, 1.321),
-    ('ETHYLENE GLYCOL', 197.3, -13.2, 1.114),
-    ('FORMIC ACID', 100.6, 8.3, 1.22),
-    ('HEPTANE', 98.4, -90.6, 0.684),
-    ('HEXAMETHYL PHOSPHORAMIDE', 233.2, 7.2, 1.027),
-    ('HEXANE', 68.7, -95.3, 0.659),
-    ('ISO OCTANE', 99.2, -107.4, 0.692),
-    ('ISOPROPYL ACETATE', 88.6, -73.4, 0.872),
-    ('ISOPROPYL ALCOHOL', 82.3, -88.0, 0.785),
-    ('METHYL ALCOHOL', 64.7, -97.7, 0.791),
-    ('METHYL ETHYLKETONE', 79.6, -86.7, 0.805),
-    ('METHYL ISOBUTYL KETONE', 116.5, -84.0, 0.798),
-    ('METHYL T-BUTYL ETHER', 55.5, -10.0, 0.74),
-    ('METHYLPYRROLIDINONE N', 203.2, -23.5, 1.027),
-    ('MORPHOLINE', 128.9, -3.1, 1.0),
-    ('NITROBENZENE', 210.8, 5.7, 1.208),
-    ('NITROMETHANE', 101.2, -28.5, 1.131),
-    ('PENTANE', 36.1, ' -129.7', 0.626),
-    ('PHENOL', 181.8, 40.9, 1.066),
-    ('PROPANENITRILE', 97.1, -92.8, 0.782),
-    ('PROPIONIC ACID', 141.1, -20.7, 0.993),
-    ('PROPIONITRILE', 97.4, -92.8, 0.782),
-    ('PROPYLENE GLYCOL', 187.6, -60.1, 1.04),
-    ('PYRIDINE', 115.4, -41.6, 0.978),
-    ('SULFOLANE', 287.3, 28.5, 1.262),
-    ('TETRAHYDROFURAN', 66.2, -108.5, 0.887),
-    ('TOLUENE', 110.6, -94.9, 0.867),
-    ('TRIETHYL PHOSPHATE', 215.4, -56.4, 1.072),
-    ('TRIETHYLAMINE', 89.5, -114.7, 0.726),
-    ('TRIFLUOROACETIC ACID', 71.8, -15.3, 1.489),
-    ('WATER', 100.0, 0.0, 1.0),
-    ('XYLENES', 139.1, -47.8, 0.86)
+{'source_path': 'AOV_spec_dot_nc8.tif', 'dest_space': 'nc8', 'depth': 'uint8', 'source_space': 'nc8',
+    'orig_source': 'AOV_spec_dot_nc8.tif', 'dest_path': 'AOV_spec_dot_nc8.tx',
+    'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Eyes/textures'},
+{'source_path': 'dome_lnf.hdr', 'dest_space': 'lnf', 'depth': 'float', 'source_space': 'lnf',
+    'orig_source': 'dome_lnf.hdr', 'dest_path': 'dome_lnf.tx',
+    'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Eyes/textures'},
+{'source_path': 'iris_NRM_nc8.tif', 'dest_space': 'nc8', 'depth': 'uint8', 'source_space': 'nc8',
+    'orig_source': 'iris_NRM_nc8.tif', 'dest_path': 'iris_NRM_nc8.tx',
+    'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Eyes/textures'},
+{'source_path': 'chr_Body_A_Beard_Msk_nc8.1001.tif', 'dest_space': 'nc8', 'depth': 'uint8',
+    'source_space': 'nc8', 'orig_source': 'chr_Body_A_Beard_Msk_nc8.1001.tif',
+    'dest_path': 'chr_Body_A_Beard_Msk_nc8.1001.tx',
+    'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Skin/textures'},
+{'source_path': 'chr_Body_A_Blush_msk_nc8.1001.tif', 'dest_space': 'nc8', 'depth': 'uint8',
+    'source_space': 'nc8', 'orig_source': 'chr_Body_A_Blush_msk_nc8.1001.tif',
+    'dest_path': 'chr_Body_A_Blush_msk_nc8.1001.tx',
+    'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Skin/textures'}
 ]
 app = QtWidgets.QApplication([])
 win = MyWindow(data_list, header)
