@@ -4,14 +4,14 @@ import qtpy.QtWidgets as QtWidgets
 import qtpy.QtGui as QtGui
 
 class MyWindow(QtWidgets.QWidget):
-    def __init__(self, data_list, header, *args):
+    def __init__(self, data_list):
         super(MyWindow, self).__init__()
         # setGeometry(x_pos, y_pos, width, height)
         self.winwidth = 775
         self.winheight = 500
         self.setMinimumSize(self.winwidth, self.winheight)
         self.setWindowTitle("Click on column title to sort")
-        table_model = MyTableModel(self, data_list, header)
+        table_model = MyTableModel(self, data_list)
         
         self.proxy_model = QtCore.QSortFilterProxyModel()
         self.proxy_model.setSourceModel(table_model)
@@ -37,7 +37,7 @@ class MyWindow(QtWidgets.QWidget):
         self.proxy_model.setFilterRegExp(str(text))
         
 class MyTableModel(QtCore.QAbstractTableModel):
-    def __init__(self, parent, mylist, header, *args):
+    def __init__(self, parent, mylist):
         super(MyTableModel, self).__init__()
         self.mylist = mylist
         self.__columns = [{'name': 'source_path', 'visible': True},
@@ -92,8 +92,6 @@ class MyTableModel(QtCore.QAbstractTableModel):
             self.mylist.reverse()
         self.layoutChanged.emit()
 
-# the solvent data ...
-header = ['Solvent Name', ' BP (deg C)', ' MP (deg C)', ' Density (g/ml)']
 # use numbers for numeric data to sort properly
 data_list = [
 {'source_path': 'AOV_spec_dot_nc8.tif', 'dest_space': 'nc8', 'depth': 'uint8', 'source_space': 'nc8',
@@ -115,6 +113,6 @@ data_list = [
     'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Skin/textures'}
 ]
 app = QtWidgets.QApplication([])
-win = MyWindow(data_list, header)
+win = MyWindow(data_list)
 win.show()
 app.exec_()
