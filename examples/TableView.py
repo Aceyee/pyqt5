@@ -25,6 +25,7 @@ class MyWindow(QtWidgets.QWidget):
         table_view.resizeColumnsToContents()
         # enable sorting
         table_view.setSortingEnabled(True)
+        table_view.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
 
         line_edit = QtWidgets.QLineEdit()
         line_edit.textChanged.connect(self.onTextChanged)
