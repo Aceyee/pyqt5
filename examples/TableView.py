@@ -90,6 +90,9 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         if column in [column_indexes['source_path'], column_indexes['dest_path']]:
             value = editor.text()
             table_model.setData(table_index, value)
+        elif column in [column_indexes['source_space'], column_indexes['dest_space']]:
+            value = editor.currentText()
+            table_model.setData(table_index, value)
 
     def updateEditorGeometry(self, editor, option, index):
         editor.setGeometry(option.rect)
