@@ -68,24 +68,26 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
 
         column = index.column()
         if column in [model.columnIndex('source_path'), model.columnIndex('dest_path')]:
-            editor.setText(model.data(index, QtCore.Qt.DisplayRole))
+            editor.setText(index.model().data(index, QtCore.Qt.DisplayRole))
 
         elif column in [model.columnIndex('source_space'), model.columnIndex('dest_space')]:
             sorted_spaces = sorted(model.colorspace_mappings.keys())
             editor.addItems(sorted_spaces)
-            editor.setCurrentIndex(sorted_spaces.index(model.data(index, QtCore.Qt.DisplayRole)))
+            editor.setCurrentIndex(sorted_spaces.index(index.model().data(index, QtCore.Qt.DisplayRole)))
 
         elif column == model.columnIndex['depth']:
             depths = sorted([item['depth'] for key, item in model.colorspace_mappings.iteritems()])
             editor.addItems(depths)
-            editor.setCurrentIndex(depths.index(model.data(index)))
+            editor.setCurrentIndex(depths.index(index.model().data(index)))
 
         else:
             return None
 
     def setModelData(self, spinBox, model, index):
-        print 'ccccc'
-
+        source_model = model.sourceModel()
+        column = index.column()
+        column_indexes = source_model.columnIndexes()
+        # print column, column_indexes
         # spinBox.interpretText()
         # value = spinBox.value()
 
@@ -137,6 +139,9 @@ class MyTableModel(QtCore.QAbstractTableModel):
             if col['name'] == name:
                 return i
 
+    def columnIndexes(self):
+        return {col['name']: i for i, col in enumerate(self.__columns)}
+
     def data(self, index, role):
         if not index.isValid():
             return
@@ -165,6 +170,7 @@ class MyTableModel(QtCore.QAbstractTableModel):
         return None
 
     def sort(self, col, order):
+        print 'gggggggggggggg'
         """sort table by given column number col"""
         self.layoutAboutToBeChanged.emit()
         self.mylist = sorted(self.mylist,
