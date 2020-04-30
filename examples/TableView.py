@@ -82,15 +82,14 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         else:
             return None
 
-    def setModelData(self, spinBox, model, index):
+    def setModelData(self, editor, model, index):
         table_model = model.sourceModel()
         column = index.column()
         column_indexes = table_model.columnIndexes()
-        # print column, column_indexes
-        # spinBox.interpretText()
-        # value = spinBox.value()
-
-        # model.setData(index, value, QtCore.Qt.EditRole)
+        table_index = model.mapToSource(index)
+        if column in [column_indexes['source_path'], column_indexes['dest_path']]:
+            value = editor.text()
+            table_model.setData(table_index, value)
 
     def updateEditorGeometry(self, editor, option, index):
         editor.setGeometry(option.rect)
@@ -155,6 +154,14 @@ class MyTableModel(QtCore.QAbstractTableModel):
             return self.mylist[index.row()][role]
 
         return None
+
+    def setData(self, index, value, role=QtCore.Qt.EditRole):
+        if not index.isValid():
+            return False
+
+        if role == QtCore.Qt.EditRole:
+            self.mylist[index.row()][self.__columns[index.column()]['name']] = value
+            return True
 
     def headerData(self, col, orientation, role):
         if orientation == QtCore.Qt.Horizontal:
