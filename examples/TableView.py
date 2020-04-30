@@ -16,8 +16,13 @@ class MyWindow(QtWidgets.QWidget):
         self.proxy_model = QtCore.QSortFilterProxyModel()
         self.proxy_model.setSourceModel(table_model)
 
+
         table_view = QtWidgets.QTableView()
         table_view.setModel(self.proxy_model)
+
+        item_delegate = ItemDelegate(self)
+        table_view.setItemDelegate(item_delegate)
+
         # set font
         font = QtGui.QFont("Courier New", 14)
         table_view.setFont(font)
@@ -25,6 +30,7 @@ class MyWindow(QtWidgets.QWidget):
         table_view.resizeColumnsToContents()
         # enable sorting
         table_view.setSortingEnabled(True)
+        # select rows
         table_view.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
 
         line_edit = QtWidgets.QLineEdit()
@@ -36,6 +42,42 @@ class MyWindow(QtWidgets.QWidget):
     
     def onTextChanged(self, text):
         self.proxy_model.setFilterRegExp(str(text))
+
+
+class ItemDelegate(QtWidgets.QStyledItemDelegate):
+    def __init__(self, parent=None):
+        super(ItemDelegate, self).__init__(parent)
+        self.edited_indexes = dict()
+
+    def createEditor(self, parent, option, index):
+        print 'aaaaaa'
+
+        editor = QtWidgets.QSpinBox(parent)
+        editor.setFrame(False)
+        editor.setMinimum(0)
+        editor.setMaximum(100)
+        return editor
+
+    def setEditorData(self, spinBox, index):
+        print 'bbbbb'
+
+        value = index.model().data(index, QtCore.Qt.EditRole)
+
+        spinBox.setValue(value)
+
+    def setModelData(self, spinBox, model, index):
+        print 'ccccc'
+
+        spinBox.interpretText()
+        value = spinBox.value()
+
+        model.setData(index, value, QtCore.Qt.EditRole)
+
+    def updateEditorGeometry(self, editor, option, index):
+        print 'ddddd'
+
+        editor.setGeometry(option.rect)
+        
         
 class MyTableModel(QtCore.QAbstractTableModel):
     def __init__(self, parent, mylist):
@@ -49,6 +91,8 @@ class MyTableModel(QtCore.QAbstractTableModel):
                     {'name': 'orig_source', 'visible': False},
                     {'name': 'folder', 'visible': False},
                     ]
+    def flags(self, index):
+        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
 
     def rowCount(self, parent):
         return len(self.mylist)
