@@ -50,32 +50,48 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         self.edited_indexes = dict()
 
     def createEditor(self, parent, option, index):
-        print 'aaaaaa'
+        model = index.model().sourceModel()
+        column = index.column()
+        if column in [model.columnIndex('source_path'), model.columnIndex('dest_path')]:
+            editor = QtWidgets.QLineEdit(parent)
 
-        editor = QtWidgets.QSpinBox(parent)
-        editor.setFrame(False)
-        editor.setMinimum(0)
-        editor.setMaximum(100)
+        elif column in [model.columnIndex('source_space'), model.columnIndex('dest_space')]:
+            editor = QtWidgets.QComboBox(parent)
+
+        else:
+            return None
+
         return editor
 
-    def setEditorData(self, spinBox, index):
-        print 'bbbbb'
+    def setEditorData(self, editor, index):
+        model = index.model().sourceModel()
 
-        value = index.model().data(index, QtCore.Qt.EditRole)
+        column = index.column()
+        if column in [model.columnIndex('source_path'), model.columnIndex('dest_path')]:
+            editor.setText(model.data(index, QtCore.Qt.DisplayRole))
 
-        spinBox.setValue(value)
+        elif column in [model.columnIndex('source_space'), model.columnIndex('dest_space')]:
+            sorted_spaces = sorted(model.colorspace_mappings.keys())
+            editor.addItems(sorted_spaces)
+            editor.setCurrentIndex(sorted_spaces.index(model.data(index, QtCore.Qt.DisplayRole)))
+
+        elif column == model.columnIndex['depth']:
+            depths = sorted([item['depth'] for key, item in model.colorspace_mappings.iteritems()])
+            editor.addItems(depths)
+            editor.setCurrentIndex(depths.index(model.data(index)))
+
+        else:
+            return None
 
     def setModelData(self, spinBox, model, index):
         print 'ccccc'
 
-        spinBox.interpretText()
-        value = spinBox.value()
+        # spinBox.interpretText()
+        # value = spinBox.value()
 
-        model.setData(index, value, QtCore.Qt.EditRole)
+        # model.setData(index, value, QtCore.Qt.EditRole)
 
     def updateEditorGeometry(self, editor, option, index):
-        print 'ddddd'
-
         editor.setGeometry(option.rect)
         
         
@@ -91,6 +107,21 @@ class MyTableModel(QtCore.QAbstractTableModel):
                     {'name': 'orig_source', 'visible': False},
                     {'name': 'folder', 'visible': False},
                     ]
+        self.colorspace_mappings = {'nc8': {'space': 'nc8', 'format': 'uint8'},
+                        'nc16': {'space': 'nc16', 'format': 'uint16'},
+                        'ncf': {'space': 'ncf', 'format': 'float'},
+                        'nch': {'space': 'nch', 'format': 'half'},
+                        'dt8': {'space': 'lnh', 'format': 'half'},
+                        'dt16': {'space': 'lnh', 'format': 'half'},
+                        'dth': {'space': 'lnh', 'format': 'half'},
+                        'dtf': {'space': 'lnf', 'format': 'float'},
+                        'lnh': {'space': 'lnh', 'format': 'half'},
+                        'lnf': {'space': 'lnf', 'format': 'float'},
+                        'dtt': {'space': 'lnh', 'format': 'half'},
+                        'srgb': {'space': 'lnh', 'format': 'half'},
+                        'srgf': {'space': 'lnf', 'format': 'float'}
+                        }
+
     def flags(self, index):
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
 
@@ -100,6 +131,11 @@ class MyTableModel(QtCore.QAbstractTableModel):
     def columnCount(self, parent):
         num_visible = len([col for col in self.__columns if col['visible']])
         return num_visible
+
+    def columnIndex(self, name):
+        for i, col in enumerate(self.__columns):
+            if col['name'] == name:
+                return i
 
     def data(self, index, role):
         if not index.isValid():
