@@ -50,43 +50,42 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         self.edited_indexes = dict()
 
     def createEditor(self, parent, option, index):
-        model = index.model().sourceModel()
+        editor = None
+        table_model = index.model().sourceModel()
         column = index.column()
-        if column in [model.columnIndex('source_path'), model.columnIndex('dest_path')]:
+        if column in [table_model.columnIndex('source_path'), table_model.columnIndex('dest_path')]:
             editor = QtWidgets.QLineEdit(parent)
 
-        elif column in [model.columnIndex('source_space'), model.columnIndex('dest_space')]:
+        elif column in [table_model.columnIndex('source_space'), table_model.columnIndex('dest_space')]:
             editor = QtWidgets.QComboBox(parent)
-
-        else:
-            return None
 
         return editor
 
     def setEditorData(self, editor, index):
-        model = index.model().sourceModel()
+        proxy_model = index.model()
+        table_model = proxy_model.sourceModel()
 
         column = index.column()
-        if column in [model.columnIndex('source_path'), model.columnIndex('dest_path')]:
-            editor.setText(index.model().data(index, QtCore.Qt.DisplayRole))
+        if column in [table_model.columnIndex('source_path'), table_model.columnIndex('dest_path')]:
+            editor.setText(proxy_model.data(index, QtCore.Qt.DisplayRole))
 
-        elif column in [model.columnIndex('source_space'), model.columnIndex('dest_space')]:
-            sorted_spaces = sorted(model.colorspace_mappings.keys())
+        elif column in [table_model.columnIndex('source_space'), table_model.columnIndex('dest_space')]:
+            sorted_spaces = sorted(table_model.colorspace_mappings.keys())
             editor.addItems(sorted_spaces)
-            editor.setCurrentIndex(sorted_spaces.index(index.model().data(index, QtCore.Qt.DisplayRole)))
+            editor.setCurrentIndex(sorted_spaces.index(proxy_model.data(index, QtCore.Qt.DisplayRole)))
 
-        elif column == model.columnIndex['depth']:
-            depths = sorted([item['depth'] for key, item in model.colorspace_mappings.iteritems()])
+        elif column == table_model.columnIndex['depth']:
+            depths = sorted([item['depth'] for key, item in table_model.colorspace_mappings.iteritems()])
             editor.addItems(depths)
-            editor.setCurrentIndex(depths.index(index.model().data(index)))
+            editor.setCurrentIndex(depths.index(proxy_model.data(index)))
 
         else:
             return None
 
     def setModelData(self, spinBox, model, index):
-        source_model = model.sourceModel()
+        table_model = model.sourceModel()
         column = index.column()
-        column_indexes = source_model.columnIndexes()
+        column_indexes = table_model.columnIndexes()
         # print column, column_indexes
         # spinBox.interpretText()
         # value = spinBox.value()
@@ -168,16 +167,6 @@ class MyTableModel(QtCore.QAbstractTableModel):
             return col
 
         return None
-
-    def sort(self, col, order):
-        print 'gggggggggggggg'
-        """sort table by given column number col"""
-        self.layoutAboutToBeChanged.emit()
-        self.mylist = sorted(self.mylist,
-            key=operator.itemgetter(col))
-        if order == QtCore.Qt.DescendingOrder:
-            self.mylist.reverse()
-        self.layoutChanged.emit()
 
 # use numbers for numeric data to sort properly
 data_list = [
