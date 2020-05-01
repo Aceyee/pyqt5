@@ -7,21 +7,26 @@ class MyWindow(QtWidgets.QWidget):
     def __init__(self, data_list):
         super(MyWindow, self).__init__()
         # setGeometry(x_pos, y_pos, width, height)
-        self.winwidth = 775
+        self.winwidth = 1000
         self.winheight = 500
         self.setMinimumSize(self.winwidth, self.winheight)
-        self.setWindowTitle("Click on column title to sort")
+        self.setWindowTitle("TX Converter")
         table_model = MyTableModel(self, data_list)
         
         self.proxy_model = QtCore.QSortFilterProxyModel()
         self.proxy_model.setSourceModel(table_model)
-
 
         table_view = QtWidgets.QTableView()
         table_view.setModel(self.proxy_model)
 
         item_delegate = ItemDelegate(self)
         table_view.setItemDelegate(item_delegate)
+
+        # latest version is setSectionResizeMode() however, qtpy is loading old version, so use setResizeMode()
+        header_view = table_view.horizontalHeader()
+        header_view.setResizeMode(1, QtWidgets.QHeaderView.Fixed)
+        header_view.setResizeMode(3, QtWidgets.QHeaderView.Fixed)
+        header_view.setResizeMode(4, QtWidgets.QHeaderView.Fixed)
 
         # set font
         font = QtGui.QFont("Courier New", 14)
@@ -56,7 +61,7 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         if column in [table_model.columnIndex('source_path'), table_model.columnIndex('dest_path')]:
             editor = QtWidgets.QLineEdit(parent)
 
-        elif column in [table_model.columnIndex('source_space'), table_model.columnIndex('dest_space')]:
+        elif column in [table_model.columnIndex('source_role'), table_model.columnIndex('dest_role')]:
             editor = QtWidgets.QComboBox(parent)
 
         return editor
@@ -69,7 +74,7 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         if column in [table_model.columnIndex('source_path'), table_model.columnIndex('dest_path')]:
             editor.setText(proxy_model.data(index, QtCore.Qt.DisplayRole))
 
-        elif column in [table_model.columnIndex('source_space'), table_model.columnIndex('dest_space')]:
+        elif column in [table_model.columnIndex('source_role'), table_model.columnIndex('dest_role')]:
             sorted_spaces = sorted(table_model.colorspace_mappings.keys())
             editor.addItems(sorted_spaces)
             editor.setCurrentIndex(sorted_spaces.index(proxy_model.data(index, QtCore.Qt.DisplayRole)))
@@ -90,7 +95,7 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         if column in [column_indexes['source_path'], column_indexes['dest_path']]:
             value = editor.text()
             table_model.setData(table_index, value)
-        elif column in [column_indexes['source_space'], column_indexes['dest_space']]:
+        elif column in [column_indexes['source_role'], column_indexes['dest_role']]:
             value = editor.currentText()
             table_model.setData(table_index, value)
 
@@ -103,9 +108,9 @@ class MyTableModel(QtCore.QAbstractTableModel):
         super(MyTableModel, self).__init__()
         self.mylist = mylist
         self.__columns = [{'name': 'source_path', 'visible': True},
-                    {'name': 'source_space', 'visible': True},
+                    {'name': 'source_role', 'visible': True},
                     {'name': 'dest_path', 'visible': True},
-                    {'name': 'dest_space', 'visible': True},
+                    {'name': 'dest_role', 'visible': True},
                     {'name': 'depth', 'visible': True},
                     {'name': 'orig_source', 'visible': False},
                     {'name': 'folder', 'visible': False},
@@ -180,21 +185,21 @@ class MyTableModel(QtCore.QAbstractTableModel):
 
 # use numbers for numeric data to sort properly
 data_list = [
-{'source_path': 'AOV_spec_dot_nc8.tif', 'dest_space': 'nc8', 'depth': 'uint8', 'source_space': 'nc8',
+{'source_path': 'AOV_spec_dot_nc8.tif', 'dest_role': 'nc8', 'depth': 'uint8', 'source_role': 'nc8',
     'orig_source': 'AOV_spec_dot_nc8.tif', 'dest_path': 'AOV_spec_dot_nc8.tx',
     'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Eyes/textures'},
-{'source_path': 'dome_lnf.hdr', 'dest_space': 'lnf', 'depth': 'float', 'source_space': 'lnf',
+{'source_path': 'dome_lnf.hdr', 'dest_role': 'lnf', 'depth': 'float', 'source_role': 'lnf',
     'orig_source': 'dome_lnf.hdr', 'dest_path': 'dome_lnf.tx',
     'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Eyes/textures'},
-{'source_path': 'iris_NRM_nc8.tif', 'dest_space': 'nc8', 'depth': 'uint8', 'source_space': 'nc8',
+{'source_path': 'iris_NRM_nc8.tif', 'dest_role': 'nc8', 'depth': 'uint8', 'source_role': 'nc8',
     'orig_source': 'iris_NRM_nc8.tif', 'dest_path': 'iris_NRM_nc8.tx',
     'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Eyes/textures'},
-{'source_path': 'chr_Body_A_Beard_Msk_nc8.1001.tif', 'dest_space': 'nc8', 'depth': 'uint8',
-    'source_space': 'nc8', 'orig_source': 'chr_Body_A_Beard_Msk_nc8.1001.tif',
+{'source_path': 'chr_Body_A_Beard_Msk_nc8.1001.tif', 'dest_role': 'nc8', 'depth': 'uint8',
+    'source_role': 'nc8', 'orig_source': 'chr_Body_A_Beard_Msk_nc8.1001.tif',
     'dest_path': 'chr_Body_A_Beard_Msk_nc8.1001.tx',
     'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Skin/textures'},
-{'source_path': 'chr_Body_A_Blush_msk_nc8.1001.tif', 'dest_space': 'nc8', 'depth': 'uint8',
-    'source_space': 'nc8', 'orig_source': 'chr_Body_A_Blush_msk_nc8.1001.tif',
+{'source_path': 'chr_Body_A_Blush_msk_nc8.1001.tif', 'dest_role': 'nc8', 'depth': 'uint8',
+    'source_role': 'nc8', 'orig_source': 'chr_Body_A_Blush_msk_nc8.1001.tif',
     'dest_path': 'chr_Body_A_Blush_msk_nc8.1001.tx',
     'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Skin/textures'}
 ]
