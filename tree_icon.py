@@ -134,6 +134,6 @@ if __name__ == '__main__':
     view.setModel(proxy_model)
     view.setWindowTitle("Simple Tree Model")
     view.setSortingEnabled(True)
-    view.setSelectionMode(QAbstractItemView.MultiSelection)
+    view.setSelectionMode(QAbstractItemView.ExtendedSelection)
     view.show()
     sys.exit(app.exec_())
