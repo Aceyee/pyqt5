@@ -1,7 +1,6 @@
 from QTreeItem import TreeItem
-from qtpy.QtCore import QAbstractItemModel, QFile, QIODevice, QModelIndex, Qt
-from qtpy.QtWidgets import QApplication, QTreeView
-
+from qtpy.QtCore import QAbstractItemModel, QFile, QIODevice, QModelIndex, Qt, QSortFilterProxyModel
+from qtpy.QtWidgets import QApplication, QAbstractItemView, QTreeView, QTableView
 
 class TreeModel(QAbstractItemModel):
     def __init__(self, data, parent=None):
@@ -95,7 +94,6 @@ class TreeModel(QAbstractItemModel):
             if lineData:
                 # Read the column data from the rest of the line.
                 columnData = [s for s in lineData.split('\t') if s != '']
-                print columnData
                 if position > indentations[-1]:
                     # The last child of the current parent is now the new
                     # parent unless the current parent has no children.
@@ -114,6 +112,10 @@ class TreeModel(QAbstractItemModel):
 
             number += 1
 
+class IconView(QTreeView):
+    def __init__(self):
+        super(IconView, self).__init__()
+
 
 if __name__ == '__main__':
 
@@ -126,8 +128,12 @@ if __name__ == '__main__':
     model = TreeModel(f.readAll())
     f.close()
 
-    view = QTreeView()
-    view.setModel(model)
+    view = IconView()
+    proxy_model = QSortFilterProxyModel()
+    proxy_model.setSourceModel(model)
+    view.setModel(proxy_model)
     view.setWindowTitle("Simple Tree Model")
+    view.setSortingEnabled(True)
+    view.setSelectionMode(QAbstractItemView.MultiSelection)
     view.show()
     sys.exit(app.exec_())
