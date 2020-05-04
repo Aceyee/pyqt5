@@ -58,7 +58,7 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         editor = None
         table_model = index.model().sourceModel()
         column = index.column()
-        if column in [table_model.columnIndex('source_path'), table_model.columnIndex('dest_path')]:
+        if column in [table_model.columnIndex('dest_path')]:
             editor = QtWidgets.QLineEdit(parent)
 
         elif column in [table_model.columnIndex('source_role'), table_model.columnIndex('dest_role')]:
@@ -71,7 +71,7 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         table_model = proxy_model.sourceModel()
 
         column = index.column()
-        if column in [table_model.columnIndex('source_path'), table_model.columnIndex('dest_path')]:
+        if column in [table_model.columnIndex('dest_path')]:
             editor.setText(proxy_model.data(index, QtCore.Qt.DisplayRole))
 
         elif column in [table_model.columnIndex('source_role'), table_model.columnIndex('dest_role')]:
