@@ -1,9 +1,58 @@
 from QTreeItem import TreeItem
+import qtpy.QtCore as QtCore
+import qtpy.QtWidgets as QtWidgets
+import qtpy.QtGui as QtGui
 from qtpy.QtCore import QAbstractItemModel, QFile, QIODevice, QModelIndex, Qt, QSortFilterProxyModel
-from qtpy.QtWidgets import QApplication, QAbstractItemView, QTreeView, QTableView
+from qtpy.QtWidgets import QApplication, QWidget, QAbstractItemView, QTreeView, QTableView
+
+class MyWindow(QWidget):
+    def __init__(self):
+        super(MyWindow, self).__init__()
+        # setGeometry(x_pos, y_pos, width, height)
+        self.winwidth = 1000
+        self.winheight = 500
+        self.setMinimumSize(self.winwidth, self.winheight)
+        self.setWindowTitle("TX Converter")
+
+        model = TreeModel()
+        view = IconView()
+        self.proxy_model = QSortFilterProxyModel()
+        self.proxy_model.setSourceModel(model)
+        view.setModel(self.proxy_model)
+        view.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        view.show()
+
+        # item_delegate = ItemDelegate(self)
+        # view.setItemDelegate(item_delegate)
+
+        # latest version is setSectionResizeMode() however, qtpy is loading old version, so use setResizeMode()
+        # header_view = view.horizontalHeader()
+        # header_view.setResizeMode(1, QtWidgets.QHeaderView.Fixed)
+        # header_view.setResizeMode(3, QtWidgets.QHeaderView.Fixed)
+        # header_view.setResizeMode(4, QtWidgets.QHeaderView.Fixed)
+
+        # set font
+        font = QtGui.QFont("Courier New", 14)
+        view.setFont(font)
+        # set column width to fit contents (set font first!)
+        # view.resizeColumnsToContents()
+        # enable sorting
+        view.setSortingEnabled(True)
+        # select rows
+        view.setSelectionBehavior(QTableView.SelectRows)
+
+        line_edit = QtWidgets.QLineEdit()
+        line_edit.textChanged.connect(self.onTextChanged)
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.addWidget(line_edit)
+        layout.addWidget(view)
+        self.setLayout(layout)
+    
+    def onTextChanged(self, text):
+        self.proxy_model.setFilterRegExp(str(text))
 
 class TreeModel(QAbstractItemModel):
-    def __init__(self, data, parent=None):
+    def __init__(self, parent=None):
         super(TreeModel, self).__init__(parent)
 
         self.rootItem = TreeItem(("Root"))
@@ -126,19 +175,7 @@ if __name__ == '__main__':
 
     import sys
 
-    app = QApplication(sys.argv)
-
-    f = QFile('default.txt')
-    f.open(QIODevice.ReadOnly)
-    model = TreeModel(f.readAll())
-    f.close()
-
-    view = IconView()
-    proxy_model = QSortFilterProxyModel()
-    proxy_model.setSourceModel(model)
-    view.setModel(proxy_model)
-    view.setWindowTitle("Simple Tree Model")
-    view.setSortingEnabled(True)
-    view.setSelectionMode(QAbstractItemView.ExtendedSelection)
-    view.show()
-    sys.exit(app.exec_())
+    app = QApplication([])
+    win = MyWindow()
+    win.show()
+    app.exec_()
