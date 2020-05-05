@@ -31,8 +31,6 @@ class MyWindow(QtWidgets.QWidget):
         # set font
         font = QtGui.QFont("Courier New", 14)
         view.setFont(font)
-        # set column width to fit contents (set font first!)
-        # view.resizeColumnsToContents()
         # enable sorting
         view.setSortingEnabled(True)
         # select rows
