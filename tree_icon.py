@@ -6,7 +6,15 @@ class TreeModel(QAbstractItemModel):
     def __init__(self, data, parent=None):
         super(TreeModel, self).__init__(parent)
 
-        self.rootItem = TreeItem(("Title", "Summary", "ttt", "aaaa", "ccc"))
+        self.rootItem = TreeItem(("Root"))
+        self.__columns = [{'name': 'source_path', 'visible': True},
+            {'name': 'source_role', 'visible': True},
+            {'name': 'dest_path', 'visible': True},
+            {'name': 'dest_role', 'visible': True},
+            {'name': 'depth', 'visible': True},
+            {'name': 'orig_source', 'visible': False},
+            {'name': 'folder', 'visible': False},
+            ]
         data = [
             {'source_path': 'AOV_spec_dot_nc8.tif', 'dest_role': 'nc8', 'depth': 'uint8', 'source_role': 'nc8',
                 'orig_source': 'AOV_spec_dot_nc8.tif', 'dest_path': 'AOV_spec_dot_nc8.tx',
@@ -24,21 +32,26 @@ class TreeModel(QAbstractItemModel):
             {'source_path': 'chr_Body_A_Blush_msk_nc8.1001.tif', 'dest_role': 'nc8', 'depth': 'uint8',
                 'source_role': 'nc8', 'orig_source': 'chr_Body_A_Blush_msk_nc8.1001.tif',
                 'dest_path': 'chr_Body_A_Blush_msk_nc8.1001.tx',
-                'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Skin/textures'}
+                'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Skin/textures',
+                'sublist': ['chr_Body_A_Blush_msk_nc8.1001.tif', 'chr_Body_A_Blush_msk_nc8.1002.tif', 'chr_Body_A_Blush_msk_nc8.1003.tif']}
             ]
         self.setupModelData(data, self.rootItem)
 
     def setupModelData(self, lines, parent):
         for x in range(len(lines)):
-            lineData = [lines[x][key] for key in lines[x].keys()]
+            lineData = [lines[x][key] for key in lines[x].keys() if key != 'sublist']
             tree_item = TreeItem(lineData, parent)
+            if 'sublist' in lines[x]:
+                # print lines[x]['sublist']
+                for y in lines[x]['sublist']:
+                    # print lines[x][y]
+                    subitem = TreeItem(y, tree_item)
+                    tree_item.appendChild(subitem)
             parent.appendChild(tree_item)
 
     def columnCount(self, parent):
-        if parent.isValid():
-            return parent.internalPointer().columnCount()
-        else:
-            return self.rootItem.columnCount()
+        num_visible = len([col for col in self.__columns if col['visible']])
+        return num_visible
 
     def data(self, index, role):
         if not index.isValid():
@@ -57,9 +70,12 @@ class TreeModel(QAbstractItemModel):
 
         return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
-    def headerData(self, section, orientation, role):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            return self.rootItem.data(section)
+    def headerData(self, col, orientation, role):
+        if orientation == Qt.Horizontal:
+            if role == Qt.DisplayRole:
+                result = " ".join([part.title() for part in self.__columns[col]['name'].split('_')]).replace(
+                    'Source', 'In').replace('Dest', 'Out')
+                return result
 
         return None
 
