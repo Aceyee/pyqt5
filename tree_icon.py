@@ -38,8 +38,10 @@ class TreeModel(QAbstractItemModel):
         self.setupModelData(data, self.rootItem)
 
     def setupModelData(self, lines, parent):
+        visible_columns = [item['name'] for item in self.__columns if item['visible']]
+        print visible_columns
         for x in range(len(lines)):
-            lineData = [lines[x][key] for key in lines[x].keys() if key != 'sublist']
+            lineData = [lines[x][key] for key in visible_columns]
             tree_item = TreeItem(lineData, parent)
             if 'sublist' in lines[x]:
                 # print lines[x]['sublist']
