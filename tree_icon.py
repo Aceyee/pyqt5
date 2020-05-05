@@ -50,17 +50,18 @@ class MyWindow(QtWidgets.QWidget):
 class ItemDelegate(QtWidgets.QStyledItemDelegate):
     def __init__(self, parent=None):
         super(ItemDelegate, self).__init__(parent)
-        self.edited_indexes = dict()
 
     def createEditor(self, parent, option, index):
         editor = None
         table_model = index.model().sourceModel()
         column = index.column()
-        if column in [table_model.columnIndex('dest_path')]:
-            editor = QtWidgets.QLineEdit(parent)
+        
+        if index.parent() == QtCore.QModelIndex():
+            if column in [table_model.columnIndex('dest_path')]:
+                editor = QtWidgets.QLineEdit(parent)
 
-        elif column in [table_model.columnIndex('source_role'), table_model.columnIndex('dest_role')]:
-            editor = QtWidgets.QComboBox(parent)
+            elif column in [table_model.columnIndex('source_role'), table_model.columnIndex('dest_role')]:
+                editor = QtWidgets.QComboBox(parent)
 
         return editor
 
@@ -81,9 +82,6 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
             depths = sorted([item['depth'] for key, item in table_model.colorspace_mappings.iteritems()])
             editor.addItems(depths)
             editor.setCurrentIndex(depths.index(proxy_model.data(index)))
-
-        else:
-            return None
 
     def setModelData(self, editor, model, index):
         table_model = model.sourceModel()
@@ -181,7 +179,6 @@ class TreeModel(QtCore.QAbstractItemModel):
             return None
 
         item = index.internalPointer()
-
         return item.data(index.column())
     
     def setData(self, index, value, role=QtCore.Qt.EditRole):

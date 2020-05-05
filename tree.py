@@ -24,14 +24,14 @@ class TreeModel(QAbstractItemModel):
             return None
 
         item = index.internalPointer()
-
+        print index
         return item.data(index.column())
 
     def flags(self, index):
         if not index.isValid():
             return Qt.NoItemFlags
 
-        return Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
 
     def headerData(self, section, orientation, role):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
