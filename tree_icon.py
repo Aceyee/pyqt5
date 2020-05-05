@@ -2,10 +2,8 @@ from QTreeItem import TreeItem
 import qtpy.QtCore as QtCore
 import qtpy.QtWidgets as QtWidgets
 import qtpy.QtGui as QtGui
-from qtpy.QtCore import QAbstractItemModel, QFile, QIODevice, QModelIndex, Qt, QSortFilterProxyModel
-from qtpy.QtWidgets import QApplication, QWidget, QAbstractItemView, QTreeView, QTableView
 
-class MyWindow(QWidget):
+class MyWindow(QtWidgets.QWidget):
     def __init__(self):
         super(MyWindow, self).__init__()
         # setGeometry(x_pos, y_pos, width, height)
@@ -16,10 +14,10 @@ class MyWindow(QWidget):
 
         model = TreeModel()
         view = IconView()
-        self.proxy_model = QSortFilterProxyModel()
+        self.proxy_model = QtCore.QSortFilterProxyModel()
         self.proxy_model.setSourceModel(model)
         view.setModel(self.proxy_model)
-        view.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        view.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         view.show()
 
         # item_delegate = ItemDelegate(self)
@@ -39,7 +37,7 @@ class MyWindow(QWidget):
         # enable sorting
         view.setSortingEnabled(True)
         # select rows
-        view.setSelectionBehavior(QTableView.SelectRows)
+        view.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
 
         line_edit = QtWidgets.QLineEdit()
         line_edit.textChanged.connect(self.onTextChanged)
@@ -51,7 +49,7 @@ class MyWindow(QWidget):
     def onTextChanged(self, text):
         self.proxy_model.setFilterRegExp(str(text))
 
-class TreeModel(QAbstractItemModel):
+class TreeModel(QtCore.QAbstractItemModel):
     def __init__(self, parent=None):
         super(TreeModel, self).__init__(parent)
 
@@ -106,7 +104,7 @@ class TreeModel(QAbstractItemModel):
         if not index.isValid():
             return None
 
-        if role != Qt.DisplayRole:
+        if role != QtCore.Qt.DisplayRole:
             return None
 
         item = index.internalPointer()
@@ -115,13 +113,13 @@ class TreeModel(QAbstractItemModel):
 
     def flags(self, index):
         if not index.isValid():
-            return Qt.NoItemFlags
+            return QtCore.Qt.NoItemFlags
 
-        return Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
     def headerData(self, col, orientation, role):
-        if orientation == Qt.Horizontal:
-            if role == Qt.DisplayRole:
+        if orientation == QtCore.Qt.Horizontal:
+            if role == QtCore.Qt.DisplayRole:
                 result = " ".join([part.title() for part in self.__columns[col]['name'].split('_')]).replace(
                     'Source', 'In').replace('Dest', 'Out')
                 return result
@@ -130,7 +128,7 @@ class TreeModel(QAbstractItemModel):
 
     def index(self, row, column, parent):
         if not self.hasIndex(row, column, parent):
-            return QModelIndex()
+            return QtCore.QModelIndex()
 
         if not parent.isValid():
             parentItem = self.rootItem
@@ -141,17 +139,17 @@ class TreeModel(QAbstractItemModel):
         if childItem:
             return self.createIndex(row, column, childItem)
         else:
-            return QModelIndex()
+            return QtCore.QModelIndex()
 
     def parent(self, index):
         if not index.isValid():
-            return QModelIndex()
+            return QtCore.QModelIndex()
 
         childItem = index.internalPointer()
         parentItem = childItem.parent()
 
         if parentItem == self.rootItem:
-            return QModelIndex()
+            return QtCore.QModelIndex()
 
         return self.createIndex(parentItem.row(), 0, parentItem)
 
@@ -166,16 +164,15 @@ class TreeModel(QAbstractItemModel):
 
         return parentItem.childCount()
 
-class IconView(QTreeView):
+class IconView(QtWidgets.QTreeView):
     def __init__(self):
         super(IconView, self).__init__()
 
 
 if __name__ == '__main__':
-
     import sys
 
-    app = QApplication([])
+    app = QtWidgets.QApplication([])
     win = MyWindow()
     win.show()
     app.exec_()
