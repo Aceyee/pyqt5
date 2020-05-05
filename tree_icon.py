@@ -29,7 +29,7 @@ class TreeModel(QAbstractItemModel):
                 'source_role': 'nc8', 'orig_source': 'chr_Body_A_Beard_Msk_nc8.1001.tif',
                 'dest_path': 'chr_Body_A_Beard_Msk_nc8.1001.tx',
                 'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Skin/textures'},
-            {'source_path': 'chr_Body_A_Blush_msk_nc8.1001.tif', 'dest_role': 'nc8', 'depth': 'uint8',
+            {'source_path': 'chr_Body_A_Blush_msk_nc8.<UDIM>.tif', 'dest_role': 'nc8', 'depth': 'uint8',
                 'source_role': 'nc8', 'orig_source': 'chr_Body_A_Blush_msk_nc8.1001.tif',
                 'dest_path': 'chr_Body_A_Blush_msk_nc8.1001.tx',
                 'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Skin/textures',
@@ -39,15 +39,13 @@ class TreeModel(QAbstractItemModel):
 
     def setupModelData(self, lines, parent):
         visible_columns = [item['name'] for item in self.__columns if item['visible']]
-        print visible_columns
+
         for x in range(len(lines)):
             lineData = [lines[x][key] for key in visible_columns]
             tree_item = TreeItem(lineData, parent)
             if 'sublist' in lines[x]:
-                # print lines[x]['sublist']
                 for y in lines[x]['sublist']:
-                    # print lines[x][y]
-                    subitem = TreeItem(y, tree_item)
+                    subitem = TreeItem([y], tree_item)
                     tree_item.appendChild(subitem)
             parent.appendChild(tree_item)
 
