@@ -6,8 +6,33 @@ class TreeModel(QAbstractItemModel):
     def __init__(self, data, parent=None):
         super(TreeModel, self).__init__(parent)
 
-        self.rootItem = TreeItem(("Title", "Summary"))
-        self.setupModelData(data.split('\n'), self.rootItem)
+        self.rootItem = TreeItem(("Title", "Summary", "ttt", "aaaa", "ccc"))
+        data = [
+            {'source_path': 'AOV_spec_dot_nc8.tif', 'dest_role': 'nc8', 'depth': 'uint8', 'source_role': 'nc8',
+                'orig_source': 'AOV_spec_dot_nc8.tif', 'dest_path': 'AOV_spec_dot_nc8.tx',
+                'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Eyes/textures'},
+            {'source_path': 'dome_lnf.hdr', 'dest_role': 'lnf', 'depth': 'float', 'source_role': 'lnf',
+                'orig_source': 'dome_lnf.hdr', 'dest_path': 'dome_lnf.tx',
+                'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Eyes/textures'},
+            {'source_path': 'iris_NRM_nc8.tif', 'dest_role': 'nc8', 'depth': 'uint8', 'source_role': 'nc8',
+                'orig_source': 'iris_NRM_nc8.tif', 'dest_path': 'iris_NRM_nc8.tx',
+                'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Eyes/textures'},
+            {'source_path': 'chr_Body_A_Beard_Msk_nc8.1001.tif', 'dest_role': 'nc8', 'depth': 'uint8',
+                'source_role': 'nc8', 'orig_source': 'chr_Body_A_Beard_Msk_nc8.1001.tif',
+                'dest_path': 'chr_Body_A_Beard_Msk_nc8.1001.tx',
+                'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Skin/textures'},
+            {'source_path': 'chr_Body_A_Blush_msk_nc8.1001.tif', 'dest_role': 'nc8', 'depth': 'uint8',
+                'source_role': 'nc8', 'orig_source': 'chr_Body_A_Blush_msk_nc8.1001.tif',
+                'dest_path': 'chr_Body_A_Blush_msk_nc8.1001.tx',
+                'folder': 'Y:/APA/assets/gen_elems/Character_Elems/Skin/textures'}
+            ]
+        self.setupModelData(data, self.rootItem)
+
+    def setupModelData(self, lines, parent):
+        for x in range(len(lines)):
+            lineData = [lines[x][key] for key in lines[x].keys()]
+            tree_item = TreeItem(lineData, parent)
+            parent.appendChild(tree_item)
 
     def columnCount(self, parent):
         if parent.isValid():
@@ -75,42 +100,6 @@ class TreeModel(QAbstractItemModel):
             parentItem = parent.internalPointer()
 
         return parentItem.childCount()
-
-    def setupModelData(self, lines, parent):
-        parents = [parent]
-        indentations = [0]
-
-        number = 0
-
-        while number < len(lines):
-            position = 0
-            while position < len(lines[number]):
-                if lines[number][position] != ' ':
-                    break
-                position += 1
-
-            lineData = lines[number][position:].trimmed()
-
-            if lineData:
-                # Read the column data from the rest of the line.
-                columnData = [s for s in lineData.split('\t') if s != '']
-                if position > indentations[-1]:
-                    # The last child of the current parent is now the new
-                    # parent unless the current parent has no children.
-
-                    if parents[-1].childCount() > 0:
-                        parents.append(parents[-1].child(parents[-1].childCount() - 1))
-                        indentations.append(position)
-
-                else:
-                    while position < indentations[-1] and len(parents) > 0:
-                        parents.pop()
-                        indentations.pop()
-
-                # Append a new item to the current parent's list of children.
-                parents[-1].appendChild(TreeItem(columnData, parents[-1]))
-
-            number += 1
 
 class IconView(QTreeView):
     def __init__(self):
