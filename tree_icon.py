@@ -34,6 +34,7 @@ class MyWindow(QtWidgets.QWidget):
         # enable sorting
         view.setSortingEnabled(True)
         # select rows
+        view.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         view.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
 
         line_edit = QtWidgets.QLineEdit()
