@@ -6,7 +6,6 @@ import qtpy.QtGui as QtGui
 class MyWindow(QtWidgets.QWidget):
     def __init__(self):
         super(MyWindow, self).__init__()
-        # setGeometry(x_pos, y_pos, width, height)
         self.winwidth = 1000
         self.winheight = 500
         self.setMinimumSize(self.winwidth, self.winheight)
@@ -22,10 +21,12 @@ class MyWindow(QtWidgets.QWidget):
         view.setItemDelegate(item_delegate)
 
         # latest version is setSectionResizeMode() however, qtpy is loading old version, so use setResizeMode()
-        # header_view = view.horizontalHeader()
-        # header_view.setResizeMode(1, QtWidgets.QHeaderView.Fixed)
-        # header_view.setResizeMode(3, QtWidgets.QHeaderView.Fixed)
-        # header_view.setResizeMode(4, QtWidgets.QHeaderView.Fixed)
+        header_view = view.header()
+        header_view.resizeSection(0, 300)
+        header_view.setResizeMode(1, QtWidgets.QHeaderView.Fixed)
+        header_view.resizeSection(2, 300)
+        header_view.setResizeMode(3, QtWidgets.QHeaderView.Fixed)
+        header_view.setResizeMode(4, QtWidgets.QHeaderView.Fixed)
 
         # set font
         font = QtGui.QFont("Courier New", 14)
