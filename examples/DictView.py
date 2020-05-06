@@ -1,30 +1,43 @@
 import sys
+import collections
 import qtpy.QtGui as QtGui
 import qtpy.QtWidgets as QtWidgets
 import qtpy.QtCore as QtCore
 
-class DoubleModel(QtCore.QAbstractListModel):
-    def __init__(self, student_list=list()):
-        super(DoubleModel, self).__init__()
-        self.student_list = student_list
-    
-    def rowCount(self, parent):
-        return len(self.student_list)
+class DictModel(QtGui.QStandardItemModel):
+    def __init__(self, student_dict=dict()):
+        super(DictModel, self).__init__()
+        self.student_dict = student_dict
+        self.dict = {}
+        self.setup_model()
 
+    def setup_model(self):
+        for key in self.student_dict:
+            key_item = QtGui.QStandardItem(key)
+            model = QtGui.QStandardItemModel()
+            self.appendRow(key_item)
+            self.dict[key] = model
+            for attr in self.student_dict[key]:
+                value = self.student_dict[key][attr]
+                attr_item = QtGui.QStandardItem(attr)
+                value_item = QtGui.QStandardItem(value)
+                model.appendRow([attr_item, value_item])
+            item = QtGui.QStandardItem()
+            item.setData(model, QtCore.Qt.UserRole)
+            key_item.appendRow(item)
+            
     def data(self, index, role):
-        row = index.row()
-        value = self.student_list[row]
-        first_key = next(iter(value)) 
-        if role == QtCore.Qt.DisplayRole:
-            return str(first_key)
         if role == QtCore.Qt.UserRole:
-            return value[first_key]
+            key = index.data()
+            return self.dict[key]
 
-class DoubleView(QtWidgets.QWidget):
+        return QtGui.QStandardItemModel.data(self, index, role)
+
+class DictView(QtWidgets.QWidget):
     def __init__(self):
-        super(DoubleView, self).__init__()
+        super(DictView, self).__init__()
         self.left_view = QtWidgets.QListView()
-        self.right_view = QtWidgets.QListView()
+        self.right_view = QtWidgets.QTreeView()
         self.main_layout = QtWidgets.QGridLayout()
         self.setup()
 
@@ -36,7 +49,7 @@ class DoubleView(QtWidgets.QWidget):
         self.setup_left_view()
         self.setup_right_view()
 
-        # add all above to main layout
+        # add two views to main layout
         self.main_layout.addWidget(self.left_view, 0, 0)
         self.main_layout.addWidget(self.right_view, 0, 1)
         self.setLayout(self.main_layout)
@@ -57,9 +70,10 @@ class DoubleView(QtWidgets.QWidget):
 
     def setup_right_view(self):
         """
-        This function initialize right view's event
+        This function initialize left view's event
         """
-        self.right_view.clicked.connect(self.index_changed)
+        self.right_view.setHeaderHidden(True)
+        self.right_view.setIndentation(10)
 
     def index_changed(self, index):
         """
@@ -74,21 +88,22 @@ class DoubleView(QtWidgets.QWidget):
         This function updates the right group box according the list view's current selected item
         """
         index = self.left_view.currentIndex()
-        model = index.model()
-        info_dict = model.data(index, QtCore.Qt.UserRole)
-        for key in info_dict:
-            key_label = QtWidgets.QLabel(key)
-            val_label = QtWidgets.QLabel(info_dict[key])
-            key_label.setBuddy(val_label)
+        model = index.data(QtCore.Qt.UserRole)
+        self.right_view.setModel(model)
 
 if __name__ == '__main__':
-    student_list = [
-        {'student1': {'height':'170cm', 'weight':'60kg'}},
-        {'student2': {'height':'160cm', 'weight':'55kg'}}
-    ]
+    student_dict = collections.OrderedDict()
+    student_dict['Jason Major'] = {
+            'height':'170cm',
+            'weight':'60kg'
+            }
+    student_dict['Alex Boyd'] = {
+            'height':'160cm',
+            'weight':'55kg'
+            }
     app = QtWidgets.QApplication(sys.argv)
-    model = DoubleModel(student_list)
-    view = DoubleView()
+    model = DictModel(student_dict)
+    view = DictView()
     view.setModel(model)
     view.show()
     sys.exit(app.exec_())
