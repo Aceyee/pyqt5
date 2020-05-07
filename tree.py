@@ -8,7 +8,8 @@ class TreeModel(QAbstractItemModel):
         super(TreeModel, self).__init__(parent)
 
         self.rootItem = TreeItem(("Title", "Summary"))
-        self.setupModelData(data.split('\n'), self.rootItem)
+        lines = data.split('\n')
+        self.setupModelData(lines, self.rootItem)
 
     def columnCount(self, parent):
         if parent.isValid():
@@ -24,7 +25,6 @@ class TreeModel(QAbstractItemModel):
             return None
 
         item = index.internalPointer()
-        print index
         return item.data(index.column())
 
     def flags(self, index):
@@ -123,11 +123,12 @@ if __name__ == '__main__':
 
     f = QFile('default.txt')
     f.open(QIODevice.ReadOnly)
-    model = TreeModel(f.readAll())
+    data = f.readAll()
+    model = TreeModel(data)
     f.close()
 
     view = QTreeView()
     view.setModel(model)
-    view.setWindowTitle("Simple Tree Model")
+    view.setWindowTitle("MVTree")
     view.show()
     sys.exit(app.exec_())
