@@ -5,6 +5,14 @@ class Button(object):
     def __init__(self, name):
         self.name = name
 
+class ItemDelegate(QtWidgets.QStyledItemDelegate):
+    def __init__(self, parent=None):
+        super(ItemDelegate, self).__init__(parent)
+
+    def paint(self, painter, option, index):
+        QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
+        pass
+
 class TreeItem(object):
     def __init__(self, data, is_header=False, parent=None):
         self.parentItem = parent
@@ -46,7 +54,7 @@ class TreeItem(object):
 class TreeModel(QtCore.QAbstractItemModel):
     def __init__(self, data, parent=None):
         super(TreeModel, self).__init__(parent)
-        self.rootItem = TreeItem("", True, None)
+        self.rootItem = TreeItem("header", True, None)
         self.setupModelData(data, self.rootItem)
 
     def columnCount(self, parent):
@@ -60,6 +68,9 @@ class TreeModel(QtCore.QAbstractItemModel):
             return None
 
         if role != QtCore.Qt.DisplayRole:
+            return None
+
+        if index == QtCore.QModelIndex():
             return None
 
         item = index.internalPointer()
@@ -136,6 +147,14 @@ if __name__ == '__main__':
     }
     model = TreeModel(data)
     view = QtWidgets.QTreeView()
+    view.setIndentation(0)
+    item_delegate = ItemDelegate()
+    view.setItemDelegate(item_delegate)
+    
+    view.setRootIsDecorated(False)
+
+    view.setHeaderHidden(True)
+
     view.setModel(model)
     view.setWindowTitle("MVTree")
     view.show()
