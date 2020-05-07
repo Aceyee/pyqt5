@@ -1,10 +1,15 @@
 import qtpy.QtCore as QtCore
 import qtpy.QtWidgets as QtWidgets
 
+class Button(object):
+    def __init__(self, name):
+        self.name = name
+
 class TreeItem(object):
-    def __init__(self, data, parent=None):
+    def __init__(self, data, is_header=False, parent=None):
         self.parentItem = parent
         self.itemData = data
+        self.is_header = is_header
         self.childItems = []
 
     def appendChild(self, item):
@@ -21,7 +26,10 @@ class TreeItem(object):
 
     def data(self, column):
         try:
-            return self.itemData
+            if self.is_header:
+                return self.itemData
+            else:
+                return self.itemData.name
         except IndexError:
             return None
 
@@ -38,7 +46,7 @@ class TreeItem(object):
 class TreeModel(QtCore.QAbstractItemModel):
     def __init__(self, data, parent=None):
         super(TreeModel, self).__init__(parent)
-        self.rootItem = TreeItem("")
+        self.rootItem = TreeItem("", True, None)
         self.setupModelData(data, self.rootItem)
 
     def columnCount(self, parent):
@@ -63,9 +71,9 @@ class TreeModel(QtCore.QAbstractItemModel):
 
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
-    def headerData(self, section, orientation, role):
+    def headerData(self, column, orientation, role):
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
-            return self.rootItem.data(section)
+            return self.rootItem.data(column)
 
         return None
 
@@ -110,9 +118,9 @@ class TreeModel(QtCore.QAbstractItemModel):
     def setupModelData(self, data, parent):
         header = data['header']
         buttons = data['buttons']
-        header_item = TreeItem(header, parent)
+        header_item = TreeItem(header, True, parent)
         for button in buttons:
-            button_item = TreeItem(button, header_item)
+            button_item = TreeItem(button, False, header_item)
             header_item.appendChild(button_item)
         parent.appendChild(header_item)
         
@@ -124,7 +132,7 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     data = {
         'header':'camera',
-        'buttons': ['shake', 'aaa', 'ccc']
+        'buttons': [Button('shake'), Button('aaa'), Button('ccc')]
     }
     model = TreeModel(data)
     view = QtWidgets.QTreeView()
