@@ -1,27 +1,57 @@
-from QTreeItem import TreeItem
-from qtpy.QtCore import QAbstractItemModel, QFile, QIODevice, QModelIndex, Qt
-from qtpy.QtWidgets import QApplication, QTreeView
+import qtpy.QtCore as QtCore
+import qtpy.QtWidgets as QtWidgets
+
+class TreeItem(object):
+    def __init__(self, data, parent=None):
+        self.parentItem = parent
+        self.itemData = data
+        self.childItems = []
+
+    def appendChild(self, item):
+        self.childItems.append(item)
+
+    def child(self, row):
+        return self.childItems[row]
+
+    def childCount(self):
+        return len(self.childItems)
+
+    def columnCount(self):
+        return len(self.itemData)
+
+    def data(self, column):
+        try:
+            return self.itemData
+        except IndexError:
+            return None
+
+    def parent(self):
+        return self.parentItem
+
+    def row(self):
+        if self.parentItem:
+            return self.parentItem.childItems.index(self)
+
+        return 0
 
 
-class TreeModel(QAbstractItemModel):
+class TreeModel(QtCore.QAbstractItemModel):
     def __init__(self, data, parent=None):
         super(TreeModel, self).__init__(parent)
-
-        self.rootItem = TreeItem(("Title", "Summary"))
-        lines = data.split('\n')
-        self.setupModelData(lines, self.rootItem)
+        self.rootItem = TreeItem("")
+        self.setupModelData(data, self.rootItem)
 
     def columnCount(self, parent):
         if parent.isValid():
             return parent.internalPointer().columnCount()
         else:
-            return self.rootItem.columnCount()
+            return 1
 
     def data(self, index, role):
         if not index.isValid():
             return None
 
-        if role != Qt.DisplayRole:
+        if role != QtCore.Qt.DisplayRole:
             return None
 
         item = index.internalPointer()
@@ -29,19 +59,19 @@ class TreeModel(QAbstractItemModel):
 
     def flags(self, index):
         if not index.isValid():
-            return Qt.NoItemFlags
+            return QtCore.Qt.NoItemFlags
 
-        return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
+        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
     def headerData(self, section, orientation, role):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
             return self.rootItem.data(section)
 
         return None
 
     def index(self, row, column, parent):
         if not self.hasIndex(row, column, parent):
-            return QModelIndex()
+            return QtCore.QModelIndex()
 
         if not parent.isValid():
             parentItem = self.rootItem
@@ -52,17 +82,17 @@ class TreeModel(QAbstractItemModel):
         if childItem:
             return self.createIndex(row, column, childItem)
         else:
-            return QModelIndex()
+            return QtCore.QModelIndex()
 
     def parent(self, index):
         if not index.isValid():
-            return QModelIndex()
+            return QtCore.QModelIndex()
 
         childItem = index.internalPointer()
         parentItem = childItem.parent()
 
         if parentItem == self.rootItem:
-            return QModelIndex()
+            return QtCore.QModelIndex()
 
         return self.createIndex(parentItem.row(), 0, parentItem)
 
@@ -77,57 +107,27 @@ class TreeModel(QAbstractItemModel):
 
         return parentItem.childCount()
 
-    def setupModelData(self, lines, parent):
-        parents = [parent]
-        indentations = [0]
-
-        number = 0
-
-        while number < len(lines):
-            position = 0
-            while position < len(lines[number]):
-                if lines[number][position] != ' ':
-                    break
-                position += 1
-
-            lineData = lines[number][position:].trimmed()
-
-            if lineData:
-                # Read the column data from the rest of the line.
-                columnData = [s for s in lineData.split('\t') if s != '']
-                print columnData
-                if position > indentations[-1]:
-                    # The last child of the current parent is now the new
-                    # parent unless the current parent has no children.
-
-                    if parents[-1].childCount() > 0:
-                        parents.append(parents[-1].child(parents[-1].childCount() - 1))
-                        indentations.append(position)
-
-                else:
-                    while position < indentations[-1] and len(parents) > 0:
-                        parents.pop()
-                        indentations.pop()
-
-                # Append a new item to the current parent's list of children.
-                parents[-1].appendChild(TreeItem(columnData, parents[-1]))
-
-            number += 1
-
+    def setupModelData(self, data, parent):
+        header = data['header']
+        buttons = data['buttons']
+        header_item = TreeItem(header, parent)
+        for button in buttons:
+            button_item = TreeItem(button, header_item)
+            header_item.appendChild(button_item)
+        parent.appendChild(header_item)
+        
 
 if __name__ == '__main__':
 
     import sys
 
-    app = QApplication(sys.argv)
-
-    f = QFile('default.txt')
-    f.open(QIODevice.ReadOnly)
-    data = f.readAll()
+    app = QtWidgets.QApplication(sys.argv)
+    data = {
+        'header':'camera',
+        'buttons': ['shake', 'aaa', 'ccc']
+    }
     model = TreeModel(data)
-    f.close()
-
-    view = QTreeView()
+    view = QtWidgets.QTreeView()
     view.setModel(model)
     view.setWindowTitle("MVTree")
     view.show()
