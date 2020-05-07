@@ -1,4 +1,5 @@
 import qtpy.QtCore as QtCore
+import qtpy.QtGui as QtGui
 import qtpy.QtWidgets as QtWidgets
 
 class Button(object):
@@ -8,10 +9,18 @@ class Button(object):
 class ItemDelegate(QtWidgets.QStyledItemDelegate):
     def __init__(self, parent=None):
         super(ItemDelegate, self).__init__(parent)
+        self.parent = parent
+        image_path = r'D:\pipeline\zihany\dev\git_repo\tool_panel_maya_anm\src\tool_panel_maya_anm\animate\anim_rec\anim_rec.png'
+        self.image = QtGui.QImage(image_path)
 
     def paint(self, painter, option, index):
-        QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
-        pass
+        # print self.parent.geometry()
+        if index.data(QtCore.Qt.UserRole):
+            QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
+        else:
+            row = index.row()
+            rect = QtCore.QRect(row*50, 20, 50, 50)
+            painter.drawImage(rect,self.image)
 
 class TreeItem(object):
     def __init__(self, data, is_header=False, parent=None):
@@ -67,14 +76,13 @@ class TreeModel(QtCore.QAbstractItemModel):
         if not index.isValid():
             return None
 
-        if role != QtCore.Qt.DisplayRole:
-            return None
-
-        if index == QtCore.QModelIndex():
-            return None
-
-        item = index.internalPointer()
-        return item.data(index.column())
+        if role == QtCore.Qt.DisplayRole:
+            item = index.internalPointer()
+            return item.data(index.column())
+        
+        if role == QtCore.Qt.UserRole:
+            item = index.internalPointer()
+            return item.is_header
 
     def flags(self, index):
         if not index.isValid():
@@ -143,12 +151,12 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     data = {
         'header':'camera',
-        'buttons': [Button('shake'), Button('aaa'), Button('ccc')]
+        'buttons': [Button('shake'), Button('aaa'), Button('ccc'), Button('sha'), Button('lll'), Button('ppp')]
     }
     model = TreeModel(data)
     view = QtWidgets.QTreeView()
     view.setIndentation(0)
-    item_delegate = ItemDelegate()
+    item_delegate = ItemDelegate(view)
     view.setItemDelegate(item_delegate)
     
     view.setRootIsDecorated(False)
