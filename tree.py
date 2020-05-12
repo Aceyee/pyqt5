@@ -18,8 +18,11 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         if index.data(QtCore.Qt.UserRole):
             QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
         else:
+            # button_list = index.data()
+            # print button_list
             row = index.row()
-            rect = QtCore.QRect(row*50, 20, 50, 50)
+            rect = option.rect
+            rect = QtCore.QRect(row*50, rect.y(), 50, 50)
             painter.drawImage(rect,self.image)
 
 class TreeItem(object):
@@ -84,6 +87,11 @@ class TreeModel(QtCore.QAbstractItemModel):
             item = index.internalPointer()
             return item.is_header
 
+        if role == QtCore.Qt.SizeHintRole:
+            item = index.internalPointer()
+            if not item.is_header:
+                return QtCore.QSize(200,200)
+
     def flags(self, index):
         if not index.isValid():
             return QtCore.Qt.NoItemFlags
@@ -95,6 +103,14 @@ class TreeModel(QtCore.QAbstractItemModel):
             return self.rootItem.data(column)
 
         return None
+
+    def indexRowSizeHint(self, index):
+        print 'here'
+        return 100
+
+    def rowHeight(self, index):
+        print '2222'
+        return 100
 
     def index(self, row, column, parent):
         if not self.hasIndex(row, column, parent):
@@ -137,11 +153,19 @@ class TreeModel(QtCore.QAbstractItemModel):
     def setupModelData(self, data, parent):
         header = data['header']
         buttons = data['buttons']
+        buttons2 = data['buttons']
         header_item = TreeItem(header, True, parent)
-        for button in buttons:
-            button_item = TreeItem(button, False, header_item)
-            header_item.appendChild(button_item)
+        content_item = TreeItem(buttons, False, header_item)
+        header_item.appendChild(content_item)
+
+        header_item2 = TreeItem(header, True, parent)
+        content_item2 = TreeItem(buttons2, False, header_item2)
+        header_item2.appendChild(content_item2)
+        # for button in buttons:
+            # button_item = TreeItem(button, False, header_item)
+            # header_item.appendChild(button_item)
         parent.appendChild(header_item)
+        parent.appendChild(header_item2)
         
 
 if __name__ == '__main__':
