@@ -18,12 +18,12 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         if index.data(QtCore.Qt.UserRole):
             QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
         else:
-            # button_list = index.data()
-            # print button_list
-            row = index.row()
-            rect = option.rect
-            rect = QtCore.QRect(row*50, rect.y(), 50, 50)
-            painter.drawImage(rect,self.image)
+            button_list = index.data()
+            for x in range(len(button_list)):            
+                x = x * 50
+                rect = option.rect
+                rect = QtCore.QRect(x, rect.y(), 50, 50)
+                painter.drawImage(rect, self.image)
 
 class TreeItem(object):
     def __init__(self, data, is_header=False, parent=None):
@@ -46,10 +46,7 @@ class TreeItem(object):
 
     def data(self, column):
         try:
-            if self.is_header:
-                return self.itemData
-            else:
-                return self.itemData.name
+            return self.itemData
         except IndexError:
             return None
 
@@ -154,6 +151,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         header = data['header']
         buttons = data['buttons']
         buttons2 = data['buttons']
+
         header_item = TreeItem(header, True, parent)
         content_item = TreeItem(buttons, False, header_item)
         header_item.appendChild(content_item)
@@ -161,9 +159,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         header_item2 = TreeItem(header, True, parent)
         content_item2 = TreeItem(buttons2, False, header_item2)
         header_item2.appendChild(content_item2)
-        # for button in buttons:
-            # button_item = TreeItem(button, False, header_item)
-            # header_item.appendChild(button_item)
+        
         parent.appendChild(header_item)
         parent.appendChild(header_item2)
         
