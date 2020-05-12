@@ -101,14 +101,6 @@ class TreeModel(QtCore.QAbstractItemModel):
 
         return None
 
-    def indexRowSizeHint(self, index):
-        print 'here'
-        return 100
-
-    def rowHeight(self, index):
-        print '2222'
-        return 100
-
     def index(self, row, column, parent):
         if not self.hasIndex(row, column, parent):
             return QtCore.QModelIndex()
@@ -159,7 +151,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         header_item2 = TreeItem(header, True, parent)
         content_item2 = TreeItem(buttons2, False, header_item2)
         header_item2.appendChild(content_item2)
-        
+
         parent.appendChild(header_item)
         parent.appendChild(header_item2)
         
