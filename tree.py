@@ -14,15 +14,25 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         self.image = QtGui.QImage(image_path)
 
     def paint(self, painter, option, index):
-        # print self.parent.geometry()
+        geometry = self.parent.geometry()
+        # print index
+        width = geometry.width()
         if index.data(QtCore.Qt.UserRole):
             QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
         else:
             button_list = index.data()
-            for x in range(len(button_list)):            
+            y = 0
+            for x in range(len(button_list)):
                 x = x * 50
+                if x + 50 > width:
+                    x = 0
+                    y += 50
+                    index.model().setData(index, QtCore.QSize(20,100), QtCore.Qt.SizeHintRole)
+                    # self.parent.setGeometry(geometry.x(), geometry.y(), geometry.width(), y+50)
+
                 rect = option.rect
-                rect = QtCore.QRect(x, rect.y(), 50, 50)
+                # print x, width, rect.y()+y
+                rect = QtCore.QRect(x, rect.y()+y, 50, 50)
                 painter.drawImage(rect, self.image)
 
 class TreeItem(object):
@@ -65,6 +75,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         super(TreeModel, self).__init__(parent)
         self.rootItem = TreeItem("header", True, None)
         self.setupModelData(data, self.rootItem)
+        self.size = QtCore.QSize(20,50)
 
     def columnCount(self, parent):
         if parent.isValid():
@@ -87,7 +98,17 @@ class TreeModel(QtCore.QAbstractItemModel):
         if role == QtCore.Qt.SizeHintRole:
             item = index.internalPointer()
             if not item.is_header:
-                return QtCore.QSize(200,200)
+                return self.size
+
+    def setData(self, index, value, role):
+        if not index.isValid():
+            return False
+        if role == QtCore.Qt.SizeHintRole:
+            print 'ehhhh'
+            self.size = value
+            self.dataChanged.emit(index, index)
+            return True
+        return False
 
     def flags(self, index):
         if not index.isValid():
