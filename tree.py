@@ -12,28 +12,62 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         self.parent = parent
         image_path = r'D:\pipeline\zihany\dev\git_repo\tool_panel_maya_anm\src\tool_panel_maya_anm\animate\anim_rec\anim_rec.png'
         self.image = QtGui.QImage(image_path)
+        self.width = 0
+        self.height = 0
+        self.button_width = 50
+        self.button_height = 50
 
     def paint(self, painter, option, index):
-        geometry = self.parent.geometry()
-        # print index
-        width = geometry.width()
         if index.data(QtCore.Qt.UserRole):
             QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
         else:
-            button_list = index.data()
-            y = 0
-            for x in range(len(button_list)):
-                x = x * 50
-                if x + 50 > width:
-                    x = 0
-                    y += 50
-                    index.model().setData(index, QtCore.QSize(20,100), QtCore.Qt.SizeHintRole)
-                    # self.parent.setGeometry(geometry.x(), geometry.y(), geometry.width(), y+50)
+            geometry = self.parent.geometry()
+            print self.width, geometry.width()
 
-                rect = option.rect
-                # print x, width, rect.y()+y
-                rect = QtCore.QRect(x, rect.y()+y, 50, 50)
-                painter.drawImage(rect, self.image)
+            self.width = geometry.width()
+
+            # print index
+            width = geometry.width()
+            rect = option.rect
+            height = self.button_height
+
+            button_list = index.data()
+
+            x = rect.x() + 0
+            y = rect.y() + 0
+            lineHeight = 0
+            
+            spaceX = 0
+            spaceY = 0
+            for button in button_list:
+                next_x = x + self.button_width + spaceX
+                if next_x - spaceX > width and lineHeight > 0:
+                    x = rect.x()
+                    y = y + lineHeight + spaceY
+                    next_x = x + self.button_width + spaceX
+                    lineHeight = 0
+
+                draw_rect = QtCore.QRect(x, y, self.button_width, self.button_height)
+                painter.drawImage(draw_rect, self.image)
+                # if not testOnly:
+                    # item.setGeometry(QRect(QPoint(x, y), item.sizeHint()))
+
+                x = next_x
+                lineHeight = max(lineHeight, self.button_height)
+
+            index.model().setData(index, QtCore.QSize(20, y + lineHeight - rect.y()), QtCore.Qt.SizeHintRole)
+
+            # next_x = rect.x()
+            # next_y = rect.y()
+            # for button in button_list:
+            #     draw_rect = QtCore.QRect(next_x, next_y, self.button_width, self.button_height)
+            #     painter.drawImage(draw_rect, self.image)
+            #     next_x = next_x + self.button_width
+            #     if next_x + self.button_width > width:
+            #         next_x = 0
+            #         next_y = next_y + self.button_height
+            #         height = height + self.button_height
+
 
 class TreeItem(object):
     def __init__(self, data, is_header=False, parent=None):
