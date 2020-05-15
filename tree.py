@@ -16,17 +16,14 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         self.height = 0
         self.button_width = 50
         self.button_height = 50
+        self.height_list = [0 for i in range(2)]
 
     def paint(self, painter, option, index):
         if index.data(QtCore.Qt.UserRole):
             QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
         else:
             geometry = self.parent.geometry()
-            print self.width, geometry.width()
-
             self.width = geometry.width()
-
-            # print index
             width = geometry.width()
             rect = option.rect
             height = self.button_height
@@ -49,24 +46,14 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
 
                 draw_rect = QtCore.QRect(x, y, self.button_width, self.button_height)
                 painter.drawImage(draw_rect, self.image)
-                # if not testOnly:
-                    # item.setGeometry(QRect(QPoint(x, y), item.sizeHint()))
-
                 x = next_x
                 lineHeight = max(lineHeight, self.button_height)
 
-            index.model().setData(index, QtCore.QSize(20, y + lineHeight - rect.y()), QtCore.Qt.SizeHintRole)
-
-            # next_x = rect.x()
-            # next_y = rect.y()
-            # for button in button_list:
-            #     draw_rect = QtCore.QRect(next_x, next_y, self.button_width, self.button_height)
-            #     painter.drawImage(draw_rect, self.image)
-            #     next_x = next_x + self.button_width
-            #     if next_x + self.button_width > width:
-            #         next_x = 0
-            #         next_y = next_y + self.button_height
-            #         height = height + self.button_height
+            row = index.row()
+            h =  y + lineHeight - rect.y()
+            if self.height_list[row] != h:
+                index.model().setData(index, QtCore.QSize(20, h), QtCore.Qt.SizeHintRole)
+                self.height_list[row] = h
 
 
 class TreeItem(object):
@@ -138,7 +125,6 @@ class TreeModel(QtCore.QAbstractItemModel):
         if not index.isValid():
             return False
         if role == QtCore.Qt.SizeHintRole:
-            print 'ehhhh'
             self.size = value
             self.dataChanged.emit(index, index)
             return True
